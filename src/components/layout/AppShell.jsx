@@ -1,17 +1,18 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Home, LayoutGrid, Users, CalendarCheck, RotateCcw } from 'lucide-react';
+import { Home, LayoutGrid, Users, UserPlus } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-const navItems = [
-  { path: '/', label: 'Dashboard', icon: Home },
-  { path: '/zones', label: 'Zones', icon: LayoutGrid },
-  { path: '/team-lift', label: 'Team Lift', icon: Users },
-  { path: '/huddle', label: 'Huddle', icon: CalendarCheck },
-  { path: '/rotation', label: 'Rotation', icon: RotateCcw },
-];
+import { useAuth } from '@/lib/AuthContext';
 
 export default function AppShell() {
   const location = useLocation();
+  const { user } = useAuth();
+
+  const navItems = [
+    { path: '/', label: 'Dashboard', icon: Home },
+    { path: '/zones', label: 'Zones', icon: LayoutGrid },
+    { path: '/team-lift', label: 'Team Lift', icon: Users },
+    ...(user?.role === 'admin' ? [{ path: '/members', label: 'Members', icon: UserPlus }] : []),
+  ];
 
   return (
     <div className="min-h-screen bg-background">
