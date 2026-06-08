@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { Plus, CalendarCheck, RotateCcw, Users } from 'lucide-react';
+import { Plus, Users } from 'lucide-react';
 
 export default function QuickActions() {
   return (
@@ -15,18 +15,6 @@ export default function QuickActions() {
         <Button variant="outline" className="w-full h-auto py-4 flex flex-col gap-1.5 rounded-xl">
           <Users className="w-5 h-5 text-blue-600" />
           <span className="text-xs font-medium">Team Lift</span>
-        </Button>
-      </Link>
-      <Link to="/huddle">
-        <Button variant="outline" className="w-full h-auto py-4 flex flex-col gap-1.5 rounded-xl">
-          <CalendarCheck className="w-5 h-5 text-emerald-600" />
-          <span className="text-xs font-medium">Huddle</span>
-        </Button>
-      </Link>
-      <Link to="/rotation">
-        <Button variant="outline" className="w-full h-auto py-4 flex flex-col gap-1.5 rounded-xl">
-          <RotateCcw className="w-5 h-5 text-amber-600" />
-          <span className="text-xs font-medium">Rotate</span>
         </Button>
       </Link>
     </div>

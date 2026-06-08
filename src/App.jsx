@@ -16,8 +16,7 @@ import AppShell from '@/components/layout/AppShell';
 import Dashboard from '@/pages/Dashboard';
 import Zones from '@/pages/Zones';
 import TeamLift from '@/pages/TeamLift';
-import Huddle from '@/pages/Huddle';
-import Rotation from '@/pages/Rotation';
+
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -54,8 +53,6 @@ const AuthenticatedApp = () => {
           <Route path="/" element={<Dashboard />} />
           <Route path="/zones" element={<Zones />} />
           <Route path="/team-lift" element={<TeamLift />} />
-          <Route path="/huddle" element={<Huddle />} />
-          <Route path="/rotation" element={<Rotation />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
