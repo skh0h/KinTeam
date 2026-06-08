@@ -1,0 +1,31 @@
+{
+  "name": "FamilyMember",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Family member's name"
+    },
+    "avatar_emoji": {
+      "type": "string",
+      "description": "An emoji used as their avatar"
+    },
+    "availability": {
+      "type": "string",
+      "enum": [
+        "full",
+        "partial",
+        "unavailable"
+      ],
+      "default": "full",
+      "description": "Availability for the current week"
+    },
+    "availability_note": {
+      "type": "string",
+      "description": "Optional note about availability"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

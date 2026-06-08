@@ -62,10 +62,10 @@ module.exports = {
   			}
   		},
   		fontFamily: {
-  			heading: ['var(--font-heading)'],
-  			body: ['var(--font-body)'],
-  			display: ['var(--font-display)'],
-  			mono: ['var(--font-mono)']
+  			heading: ['var(--font-heading)', 'serif'],
+  			body: ['var(--font-body)', 'sans-serif'],
+  			display: ['var(--font-display)', 'serif'],
+  			mono: ['var(--font-mono)', 'monospace']
   		},
   		keyframes: {
   			'accordion-down': {

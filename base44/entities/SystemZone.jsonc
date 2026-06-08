@@ -1,0 +1,41 @@
+{
+  "name": "SystemZone",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Zone name (e.g., Nutrition, Logistics)"
+    },
+    "icon": {
+      "type": "string",
+      "description": "Lucide icon name for the zone"
+    },
+    "color": {
+      "type": "string",
+      "description": "Tailwind color class identifier"
+    },
+    "description": {
+      "type": "string",
+      "description": "Brief description of what this zone covers"
+    },
+    "current_lead_name": {
+      "type": "string",
+      "description": "Name of the current week's lead"
+    },
+    "rotation_order": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Ordered list of family member names for rotation"
+    },
+    "rotation_index": {
+      "type": "number",
+      "default": 0,
+      "description": "Current index in rotation_order"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

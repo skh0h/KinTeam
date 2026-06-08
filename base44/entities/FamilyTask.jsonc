@@ -1,0 +1,79 @@
+{
+  "name": "FamilyTask",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Task title"
+    },
+    "zone_id": {
+      "type": "string",
+      "description": "ID of the SystemZone this task belongs to"
+    },
+    "zone_name": {
+      "type": "string",
+      "description": "Denormalized zone name for display"
+    },
+    "task_type": {
+      "type": "string",
+      "enum": [
+        "routine",
+        "team_lift"
+      ],
+      "default": "routine",
+      "description": "Whether this is a simple routine task or a team-lift project"
+    },
+    "phase": {
+      "type": "string",
+      "enum": [
+        "prep",
+        "execution",
+        "verification",
+        "none"
+      ],
+      "default": "none",
+      "description": "Phase for team-lift tasks"
+    },
+    "parent_task_id": {
+      "type": "string",
+      "description": "For team-lift sub-tasks, the parent project ID"
+    },
+    "assigned_to": {
+      "type": "string",
+      "description": "Name of the family member assigned"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "in_progress",
+        "done"
+      ],
+      "default": "pending"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "default": "medium"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "week_of": {
+      "type": "string",
+      "format": "date",
+      "description": "The Monday of the week this task is for"
+    }
+  },
+  "required": [
+    "title"
+  ]
+}
