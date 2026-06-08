@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Home, LayoutGrid, Users, UserPlus } from 'lucide-react';
+import { Home, Users, UserPlus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/AuthContext';
 
@@ -9,7 +9,6 @@ export default function AppShell() {
 
   const navItems = [
     { path: '/', label: 'Dashboard', icon: Home },
-    { path: '/zones', label: 'Zones', icon: LayoutGrid },
     { path: '/team-lift', label: 'Team Lift', icon: Users },
     ...(user?.role === 'admin' ? [{ path: '/members', label: 'Members', icon: UserPlus }] : []),
   ];
