@@ -4,7 +4,11 @@
   "properties": {
     "name": {
       "type": "string",
-      "description": "Family member's name"
+      "description": "Full name of the family member"
+    },
+    "display_name": {
+      "type": "string",
+      "description": "Short display name or nickname (e.g. 'Dad', 'Lily')"
     },
     "avatar_emoji": {
       "type": "string",

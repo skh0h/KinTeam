@@ -5,88 +5,156 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { UserPlus, Mail, Shield, User } from 'lucide-react';
+import { UserPlus, Trash2, LogIn, LogOut, CheckCircle } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { Navigate } from 'react-router-dom';
 
 export default function Members() {
   const { user } = useAuth();
-  const [email, setEmail] = useState('');
-  const [role, setRole] = useState('user');
-  const [status, setStatus] = useState(null);
+  const queryClient = useQueryClient();
+  const [form, setForm] = useState({ name: '', display_name: '', avatar_emoji: '' });
 
-  // Redirect non-admins
+  const { data: members = [], isLoading } = useQuery({
+    queryKey: ['members'],
+    queryFn: () => base44.entities.FamilyMember.list(),
+  });
+
+  const addMember = useMutation({
+    mutationFn: (data) => base44.entities.FamilyMember.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['members'] });
+      setForm({ name: '', display_name: '', avatar_emoji: '' });
+    },
+  });
+
+  const deleteMember = useMutation({
+    mutationFn: (id) => base44.entities.FamilyMember.delete(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['members'] }),
+  });
+
+  // Redirect non-admins (after all hooks)
   if (user && user.role !== 'admin') {
     return <Navigate to="/" replace />;
   }
 
-  const handleInvite = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    if (!email.trim()) return;
-    setStatus('sending');
-    await base44.users.inviteUser(email.trim(), role);
-    setStatus('sent');
-    setEmail('');
-    setRole('user');
+    if (!form.name.trim()) return;
+    addMember.mutate(form);
   };
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="font-display text-3xl font-bold tracking-tight">Family Members</h1>
-        <p className="text-muted-foreground mt-1">Invite family members to create their accounts.</p>
+        <p className="text-muted-foreground mt-1">Manage who's in the household.</p>
       </div>
 
+      {/* Login status */}
+      <Card className="border-border">
+        <CardContent className="pt-4 pb-4">
+          <div className="flex items-center gap-3">
+            {user ? (
+              <>
+                <CheckCircle className="w-5 h-5 text-emerald-500 shrink-0" />
+                <div>
+                  <p className="text-sm font-medium">Logged in as <span className="text-primary">{user.full_name || user.email}</span></p>
+                  <p className="text-xs text-muted-foreground">{user.email} · {user.role}</p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="ml-auto text-muted-foreground gap-1.5"
+                  onClick={() => base44.auth.logout()}
+                >
+                  <LogOut className="w-4 h-4" /> Log out
+                </Button>
+              </>
+            ) : (
+              <>
+                <LogIn className="w-5 h-5 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">Not logged in</p>
+              </>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Add member */}
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
             <UserPlus className="w-5 h-5 text-primary" />
-            <CardTitle className="font-display text-lg">Invite a Member</CardTitle>
+            <CardTitle className="font-display text-lg">Add a Family Member</CardTitle>
           </div>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleInvite} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Full Name</Label>
+                <Input
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  placeholder="Jane Smith"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Display Name</Label>
+                <Input
+                  value={form.display_name}
+                  onChange={(e) => setForm({ ...form, display_name: e.target.value })}
+                  placeholder="Mom"
+                  className="mt-1"
+                />
+              </div>
+            </div>
             <div>
-              <Label>Email Address</Label>
+              <Label>Emoji Avatar (optional)</Label>
               <Input
-                type="email"
-                value={email}
-                onChange={(e) => { setEmail(e.target.value); setStatus(null); }}
-                placeholder="familymember@email.com"
-                className="mt-1"
+                value={form.avatar_emoji}
+                onChange={(e) => setForm({ ...form, avatar_emoji: e.target.value })}
+                placeholder="🧑"
+                className="mt-1 w-24"
               />
             </div>
-            <div>
-              <Label>Role</Label>
-              <Select value={role} onValueChange={setRole}>
-                <SelectTrigger className="mt-1">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="user">
-                    <div className="flex items-center gap-2">
-                      <User className="w-4 h-4" /> Member
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="admin">
-                    <div className="flex items-center gap-2">
-                      <Shield className="w-4 h-4" /> Admin
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <Button type="submit" className="w-full rounded-xl gap-2" disabled={status === 'sending'}>
-              <Mail className="w-4 h-4" />
-              {status === 'sending' ? 'Sending…' : 'Send Invite'}
+            <Button type="submit" className="w-full rounded-xl" disabled={addMember.isPending}>
+              {addMember.isPending ? 'Adding…' : 'Add Member'}
             </Button>
-            {status === 'sent' && (
-              <p className="text-center text-sm text-emerald-600 font-medium">Invite sent! They'll receive an email to join.</p>
-            )}
           </form>
         </CardContent>
       </Card>
+
+      {/* Members list */}
+      {members.length > 0 && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="font-display text-lg">Current Members</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {members.map(member => (
+              <div key={member.id} className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
+                <span className="text-2xl">{member.avatar_emoji || '👤'}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm">{member.name}</p>
+                  {member.display_name && (
+                    <p className="text-xs text-muted-foreground">"{member.display_name}"</p>
+                  )}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-muted-foreground hover:text-destructive shrink-0"
+                  onClick={() => deleteMember.mutate(member.id)}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
