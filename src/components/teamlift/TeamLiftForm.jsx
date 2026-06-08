@@ -41,7 +41,7 @@ export default function TeamLiftForm({ open, onOpenChange, onSubmit, zones, memb
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="font-display">New Team-Lift Project</DialogTitle>
+          <DialogTitle className="font-display">New Team-Lift Chore</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>

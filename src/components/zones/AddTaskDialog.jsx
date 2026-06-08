@@ -21,15 +21,15 @@ export default function AddTaskDialog({ open, onOpenChange, onSubmit, members, z
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-display">Add Task to {zoneName}</DialogTitle>
+          <DialogTitle className="font-display">Add Chore to {zoneName}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label>Task Name</Label>
+            <Label>Chore Name</Label>
             <Input
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
-              placeholder="What needs to be done?"
+              placeholder="What chore needs to be done?"
               className="mt-1"
             />
           </div>
@@ -68,7 +68,7 @@ export default function AddTaskDialog({ open, onOpenChange, onSubmit, members, z
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <Button type="submit">Add Task</Button>
+            <Button type="submit">Add Chore</Button>
           </DialogFooter>
         </form>
       </DialogContent>

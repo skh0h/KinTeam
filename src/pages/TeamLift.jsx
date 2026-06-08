@@ -95,7 +95,7 @@ export default function TeamLift() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="font-display text-3xl font-bold tracking-tight">Team Lift</h1>
-          <p className="text-muted-foreground mt-1">Break big tasks into collaborative phases.</p>
+          <p className="text-muted-foreground mt-1">Break big chores into collaborative phases.</p>
         </div>
         <Button onClick={() => setFormOpen(true)} className="rounded-xl">
           <Plus className="w-4 h-4 mr-2" /> New Project
@@ -117,7 +117,7 @@ export default function TeamLift() {
           <div className="text-center py-16">
             <p className="text-4xl mb-3">🏋️</p>
             <h3 className="font-display text-lg font-semibold">No Team-Lift Projects Yet</h3>
-            <p className="text-muted-foreground text-sm mt-1">Create a project to break big tasks into Prep, Execute & Verify phases.</p>
+            <p className="text-muted-foreground text-sm mt-1">Create a project to break big chores into Prep, Execute & Verify phases.</p>
           </div>
         )}
       </div>

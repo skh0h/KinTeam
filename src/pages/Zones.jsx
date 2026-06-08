@@ -74,7 +74,7 @@ export default function Zones() {
     <div className="space-y-6">
       <div>
         <h1 className="font-display text-3xl font-bold tracking-tight">System Zones</h1>
-        <p className="text-muted-foreground mt-1">Tap a zone to manage its tasks.</p>
+        <p className="text-muted-foreground mt-1">Tap a zone to manage its chores.</p>
       </div>
 
       {/* Zone pills */}
@@ -126,15 +126,15 @@ export default function Zones() {
               ))}
             </AnimatePresence>
             {zoneTasks.length === 0 && (
-              <p className="text-center text-muted-foreground py-8 text-sm">No tasks yet. Add one to get started!</p>
-            )}
-            <Button
-              variant="outline"
-              className="w-full rounded-xl border-dashed"
-              onClick={() => setAddDialogOpen(true)}
-            >
-              <Plus className="w-4 h-4 mr-2" /> Add Task
-            </Button>
+               <p className="text-center text-muted-foreground py-8 text-sm">No chores yet. Add one to get started!</p>
+             )}
+             <Button
+               variant="outline"
+               className="w-full rounded-xl border-dashed"
+               onClick={() => setAddDialogOpen(true)}
+             >
+               <Plus className="w-4 h-4 mr-2" /> Add Chore
+             </Button>
           </CardContent>
         </Card>
       )}

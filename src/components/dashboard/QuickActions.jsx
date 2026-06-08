@@ -8,7 +8,7 @@ export default function QuickActions() {
       <Link to="/zones">
         <Button variant="outline" className="w-full h-auto py-4 flex flex-col gap-1.5 rounded-xl">
           <Plus className="w-5 h-5 text-primary" />
-          <span className="text-xs font-medium">Add Task</span>
+          <span className="text-xs font-medium">Add Chore</span>
         </Button>
       </Link>
       <Link to="/team-lift">
