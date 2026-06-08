@@ -1,7 +1,6 @@
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import WeekOverview from '@/components/dashboard/WeekOverview';
-import ZoneLeadCards from '@/components/dashboard/ZoneLeadCards';
 import QuickActions from '@/components/dashboard/QuickActions';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -33,7 +32,6 @@ export default function Dashboard() {
         <p className="text-muted-foreground mt-1">Here's how the family's doing this week.</p>
       </div>
       <WeekOverview tasks={tasks} />
-      <ZoneLeadCards zones={zones} />
       <QuickActions />
     </div>
   );
