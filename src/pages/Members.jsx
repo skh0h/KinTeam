@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { UserPlus, Trash2, LogIn, LogOut, CheckCircle } from 'lucide-react';
+import { UserPlus, Trash2 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { Navigate } from 'react-router-dom';
 
@@ -49,36 +49,6 @@ export default function Members() {
         <h1 className="font-display text-3xl font-bold tracking-tight">Family Members</h1>
         <p className="text-muted-foreground mt-1">Manage who's in the household.</p>
       </div>
-
-      {/* Login status */}
-      <Card className="border-border">
-        <CardContent className="pt-4 pb-4">
-          <div className="flex items-center gap-3">
-            {user ? (
-              <>
-                <CheckCircle className="w-5 h-5 text-emerald-500 shrink-0" />
-                <div>
-                  <p className="text-sm font-medium">Logged in as <span className="text-primary">{user.full_name || user.email}</span></p>
-                  <p className="text-xs text-muted-foreground">{user.email} · {user.role}</p>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="ml-auto text-muted-foreground gap-1.5"
-                  onClick={() => base44.auth.logout()}
-                >
-                  <LogOut className="w-4 h-4" /> Log out
-                </Button>
-              </>
-            ) : (
-              <>
-                <LogIn className="w-5 h-5 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">Not logged in</p>
-              </>
-            )}
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Add member */}
       <Card>

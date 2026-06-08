@@ -17,6 +17,7 @@ import Dashboard from '@/pages/Dashboard';
 import Zones from '@/pages/Zones';
 import TeamLift from '@/pages/TeamLift';
 import Members from '@/pages/Members';
+import Settings from '@/pages/Settings';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -54,6 +55,7 @@ const AuthenticatedApp = () => {
           <Route path="/zones" element={<Zones />} />
           <Route path="/team-lift" element={<TeamLift />} />
           <Route path="/members" element={<Members />} />
+          <Route path="/settings" element={<Settings />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
