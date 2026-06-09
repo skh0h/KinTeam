@@ -2,12 +2,20 @@ import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useLocalUser } from "@/lib/LocalUserContext";
 import { useNavigate } from "react-router-dom";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Shield } from "lucide-react";
+
+const ADMIN_PIN = '1234';
 
 export default function Login() {
   const { signIn, localUser } = useLocalUser();
   const navigate = useNavigate();
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [pinTarget, setPinTarget] = useState(null);
+  const [pin, setPin] = useState('');
+  const [pinError, setPinError] = useState('');
 
   useEffect(() => {
     if (localUser) navigate("/");
@@ -21,8 +29,24 @@ export default function Login() {
   }, []);
 
   const handlePick = (member) => {
-    signIn(member);
-    window.location.href = "/";
+    if (member.role === 'admin') {
+      setPinTarget(member);
+      setPin('');
+      setPinError('');
+    } else {
+      signIn(member);
+      window.location.href = "/";
+    }
+  };
+
+  const handlePinSubmit = () => {
+    if (pin === ADMIN_PIN) {
+      signIn(pinTarget);
+      window.location.href = "/";
+    } else {
+      setPinError('Incorrect PIN. Try again.');
+      setPin('');
+    }
   };
 
   return (
@@ -34,7 +58,29 @@ export default function Login() {
           <p className="text-muted-foreground mt-1">Who are you?</p>
         </div>
 
-        {loading ? (
+        {pinTarget ? (
+          <div className="space-y-3 p-5 rounded-2xl border border-primary/30 bg-primary/5">
+            <div className="flex items-center gap-2 text-primary font-semibold">
+              <Shield className="w-4 h-4" /> Admin PIN Required
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Enter the PIN to sign in as <strong>{pinTarget.display_name || pinTarget.name}</strong>.
+            </p>
+            <Input
+              type="password"
+              placeholder="PIN"
+              value={pin}
+              onChange={(e) => { setPin(e.target.value); setPinError(''); }}
+              onKeyDown={(e) => e.key === 'Enter' && handlePinSubmit()}
+              autoFocus
+            />
+            {pinError && <p className="text-xs text-destructive">{pinError}</p>}
+            <div className="flex gap-2">
+              <Button className="flex-1" onClick={handlePinSubmit}>Confirm</Button>
+              <Button variant="outline" className="flex-1" onClick={() => setPinTarget(null)}>Back</Button>
+            </div>
+          </div>
+        ) : loading ? (
           <div className="flex justify-center py-8">
             <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
