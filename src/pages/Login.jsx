@@ -39,9 +39,12 @@ export default function Login() {
             <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
         ) : members.length === 0 ? (
-          <p className="text-center text-sm text-muted-foreground py-8">
-            No family members set up yet. Ask an admin to add members first.
-          </p>
+          <div className="text-center py-8 space-y-3">
+            <p className="text-sm text-muted-foreground">No family members set up yet.</p>
+            <a href="/members" className="inline-block px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
+              Add Members →
+            </a>
+          </div>
         ) : (
           <div className="grid grid-cols-2 gap-3">
             {members.map((member) => (
