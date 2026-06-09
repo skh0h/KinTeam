@@ -12,11 +12,6 @@ export default function TeamLift() {
   const [formOpen, setFormOpen] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data: zones = [] } = useQuery({
-    queryKey: ['zones'],
-    queryFn: () => base44.entities.SystemZone.list(),
-  });
-
   const { data: tasks = [], isLoading } = useQuery({
     queryKey: ['tasks'],
     queryFn: () => base44.entities.FamilyTask.list(),
@@ -42,27 +37,20 @@ export default function TeamLift() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['tasks'] }),
   });
 
-  const handleCreateProject = async ({ projectName, zoneId, zoneName, phases }) => {
-    // Create parent task
+  const handleCreateProject = async ({ projectName, phases }) => {
     const parent = await base44.entities.FamilyTask.create({
       title: projectName,
-      zone_id: zoneId,
-      zone_name: zoneName,
       task_type: 'team_lift',
       phase: 'none',
       status: 'pending',
       week_of: getCurrentWeekMonday(),
     });
 
-    // Create phase sub-tasks
-    const phaseEntries = ['prep', 'execution', 'verification'];
-    for (const phase of phaseEntries) {
+    for (const phase of ['prep', 'execution', 'verification']) {
       const phaseData = phases[phase];
       if (phaseData.title.trim()) {
         await base44.entities.FamilyTask.create({
           title: phaseData.title,
-          zone_id: zoneId,
-          zone_name: zoneName,
           task_type: 'team_lift',
           phase,
           parent_task_id: parent.id,
@@ -76,15 +64,13 @@ export default function TeamLift() {
     queryClient.invalidateQueries({ queryKey: ['tasks'] });
   };
 
-  // Group team-lift tasks into projects
   const projects = useMemo(() => {
     const parentTasks = tasks.filter(t => t.task_type === 'team_lift' && !t.parent_task_id);
     return parentTasks.map(parent => ({
       ...parent,
       phases: tasks.filter(t => t.parent_task_id === parent.id),
-      zone: zones.find(z => z.id === parent.zone_id),
     }));
-  }, [tasks, zones]);
+  }, [tasks]);
 
   if (isLoading) {
     return <div className="space-y-4">{Array(2).fill(0).map((_, i) => <Skeleton key={i} className="h-40 rounded-xl" />)}</div>;
@@ -108,7 +94,6 @@ export default function TeamLift() {
             key={project.id}
             projectName={project.title}
             phases={project.phases}
-            zone={project.zone}
             onStatusChange={(id, status) => updateTask.mutate({ id, data: { status } })}
             onDelete={(id) => deleteTask.mutate(id)}
           />
@@ -126,7 +111,6 @@ export default function TeamLift() {
         open={formOpen}
         onOpenChange={setFormOpen}
         onSubmit={handleCreateProject}
-        zones={zones}
         members={members}
       />
     </div>

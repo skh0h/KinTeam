@@ -9,9 +9,8 @@ import { ClipboardList, Zap, CheckSquare } from 'lucide-react';
 
 const phaseIcons = { prep: ClipboardList, execution: Zap, verification: CheckSquare };
 
-export default function TeamLiftForm({ open, onOpenChange, onSubmit, zones, members }) {
+export default function TeamLiftForm({ open, onOpenChange, onSubmit, members }) {
   const [projectName, setProjectName] = useState('');
-  const [zoneId, setZoneId] = useState('');
   const [phases, setPhases] = useState({
     prep: { title: '', assigned_to: '', notes: '' },
     execution: { title: '', assigned_to: '', notes: '' },
@@ -20,11 +19,9 @@ export default function TeamLiftForm({ open, onOpenChange, onSubmit, zones, memb
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!projectName.trim() || !zoneId) return;
-    const zone = zones.find(z => z.id === zoneId);
-    onSubmit({ projectName, zoneId, zoneName: zone?.name || '', phases });
+    if (!projectName.trim()) return;
+    onSubmit({ projectName, phases });
     setProjectName('');
-    setZoneId('');
     setPhases({
       prep: { title: '', assigned_to: '', notes: '' },
       execution: { title: '', assigned_to: '', notes: '' },
@@ -48,16 +45,6 @@ export default function TeamLiftForm({ open, onOpenChange, onSubmit, zones, memb
             <Label>Project Name</Label>
             <Input value={projectName} onChange={(e) => setProjectName(e.target.value)} placeholder="e.g., Deep Clean Kitchen" className="mt-1" />
           </div>
-          <div>
-            <Label>Zone</Label>
-            <Select value={zoneId} onValueChange={setZoneId}>
-              <SelectTrigger className="mt-1"><SelectValue placeholder="Select zone" /></SelectTrigger>
-              <SelectContent>
-                {zones.map(z => <SelectItem key={z.id} value={z.id}>{z.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-
           {['prep', 'execution', 'verification'].map(phase => {
             const Icon = phaseIcons[phase];
             return (

@@ -1,10 +1,9 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import TaskCard from '@/components/zones/TaskCard';
-import ZoneIcon from '@/components/shared/ZoneIcon';
 import { motion } from 'framer-motion';
 
-export default function TeamLiftProject({ projectName, phases, zone, onStatusChange, onDelete }) {
+export default function TeamLiftProject({ projectName, phases, onStatusChange, onDelete }) {
   const total = phases.length;
   const done = phases.filter(t => t.status === 'done').length;
   const progress = total > 0 ? Math.round((done / total) * 100) : 0;
@@ -14,13 +13,11 @@ export default function TeamLiftProject({ projectName, phases, zone, onStatusCha
       <Card>
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {zone && <ZoneIcon icon={zone.icon} color={zone.color} size="sm" />}
-              <div>
-                <h3 className="font-display text-lg font-semibold">{projectName}</h3>
-                <p className="text-xs text-muted-foreground">{zone?.name || 'General'}</p>
-              </div>
+          <div className="flex items-center gap-3">
+            <div>
+              <h3 className="font-display text-lg font-semibold">{projectName}</h3>
             </div>
+          </div>
             <span className="text-sm font-medium text-primary">{progress}%</span>
           </div>
           <Progress value={progress} className="h-1.5 mt-2" />
