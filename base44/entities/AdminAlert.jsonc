@@ -12,16 +12,31 @@
     },
     "task_title": {
       "type": "string",
-      "description": "Title of the chore marked complete"
+      "description": "Title of the chore"
     },
-    "read": {
+    "task_id": {
+      "type": "string",
+      "description": "ID of the FamilyTask this alert is about"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "default": "pending",
+      "description": "Admin review status"
+    },
+    "user_notified": {
       "type": "boolean",
       "default": false,
-      "description": "Whether an admin has read/dismissed this alert"
+      "description": "Whether user has seen the rejection notification"
     }
   },
   "required": [
     "message",
-    "from_member"
+    "from_member",
+    "task_id"
   ]
 }
