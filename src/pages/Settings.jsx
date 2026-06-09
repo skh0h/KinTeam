@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
 import { Settings as SettingsIcon, LogOut, Shield } from 'lucide-react';
 import { useLocalUser } from '@/lib/LocalUserContext';
 import { base44 } from '@/api/base44Client';
@@ -55,7 +55,7 @@ export default function Settings() {
         </TabsList>
 
         {/* Account Tab */}
-        <TabsContent value="account" className="mt-4">
+        <TabsContent value="account" className="mt-4 space-y-4">
           <Card>
             <CardHeader className="pb-3">
               <div className="flex items-center gap-2">
@@ -86,6 +86,37 @@ export default function Settings() {
               )}
             </CardContent>
           </Card>
+
+          {pinTarget && (
+            <Card className="border-primary/30 bg-primary/5">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-2">
+                  <Shield className="w-5 h-5 text-primary" />
+                  <CardTitle className="font-display text-lg">Admin PIN Required</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                    Enter the admin PIN to sign in as <strong>{pinTarget.display_name || pinTarget.name}</strong>.
+                  </p>
+                  <Input
+                    type="password"
+                    placeholder="PIN"
+                    value={pin}
+                    onChange={(e) => { setPin(e.target.value); setPinError(''); }}
+                    onKeyDown={(e) => e.key === 'Enter' && handlePinSubmit()}
+                    autoFocus
+                  />
+                  {pinError && <p className="text-xs text-destructive">{pinError}</p>}
+                  <div className="flex gap-2">
+                    <Button className="flex-1" onClick={handlePinSubmit}>Confirm</Button>
+                    <Button variant="outline" className="flex-1" onClick={() => setPinTarget(null)}>Cancel</Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         {/* Switch User Tab */}
@@ -119,31 +150,7 @@ export default function Settings() {
           </Card>
         </TabsContent>
       </Tabs>
-      {/* Admin PIN Dialog */}
-      <Dialog open={!!pinTarget} onOpenChange={(open) => { if (!open) setPinTarget(null); }}>
-        <DialogContent className="max-w-xs">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 font-display">
-              <Shield className="w-4 h-4 text-primary" /> Admin PIN Required
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3 pt-1">
-            <p className="text-sm text-muted-foreground">
-              Enter the admin PIN to sign in as <strong>{pinTarget?.display_name || pinTarget?.name}</strong>.
-            </p>
-            <Input
-              type="password"
-              placeholder="PIN"
-              value={pin}
-              onChange={(e) => { setPin(e.target.value); setPinError(''); }}
-              onKeyDown={(e) => e.key === 'Enter' && handlePinSubmit()}
-              autoFocus
-            />
-            {pinError && <p className="text-xs text-destructive">{pinError}</p>}
-            <Button className="w-full" onClick={handlePinSubmit}>Confirm</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+
     </div>
   );
 }
