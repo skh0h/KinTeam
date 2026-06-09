@@ -23,8 +23,8 @@ export default function WeekOverview({ tasks }) {
   const pending = weekTasks.filter(t => t.status === 'pending').length;
 
   const stats = [
-    { label: 'Done', value: done, icon: CheckCircle2, color: 'text-emerald-600' },
-    { label: 'Active', value: inProgress, icon: Clock, color: 'text-primary' },
+    { label: 'Chores Done', value: `${choresDone}/${choreTasks.length}`, icon: CheckCircle2, color: 'text-primary' },
+    { label: 'Team Lift Done', value: `${teamLiftDone}/${teamLiftTasks.length}`, icon: CheckCircle2, color: 'text-accent' },
     { label: 'Pending', value: pending, icon: AlertCircle, color: 'text-muted-foreground' },
   ];
 
