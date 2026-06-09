@@ -16,7 +16,7 @@ export default function Settings() {
   const [pinTarget, setPinTarget] = useState(null);
   const [pin, setPin] = useState('');
   const [pinError, setPinError] = useState('');
-  const [activeTab, setActiveTab] = useState('account');
+  const [activeTab, setActiveTab] = useState(() => localUser ? 'account' : 'auth');
 
   useEffect(() => {
     base44.entities.FamilyMember.list().then(setMembers);
@@ -83,7 +83,7 @@ export default function Settings() {
                     <LogOut className="w-4 h-4" /> Sign Out
                   </Button>
                 </div>
-              ) : (
+              ) : pinTarget ? null : (
                 <p className="text-sm text-muted-foreground text-center py-4">No one selected. Use Switch User.</p>
               )}
             </CardContent>
