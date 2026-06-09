@@ -49,6 +49,9 @@ export default function TaskCard({ task, onStatusChange, onDelete, onAssign, onP
               {task.notes && (
                 <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{task.notes}</p>
               )}
+              {task.photo_url && (
+                <img src={task.photo_url} alt="Chore reference" className="mt-2 w-full max-h-40 object-cover rounded-lg" />
+              )}
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
