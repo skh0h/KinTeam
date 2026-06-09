@@ -30,13 +30,14 @@ export default function Settings() {
       setActiveTab('account');
     } else {
       signIn(member);
+      window.location.href = '/';
     }
   };
 
   const handlePinSubmit = () => {
     if (pin === ADMIN_PIN) {
       signIn(pinTarget);
-      setPinTarget(null);
+      window.location.href = '/';
     } else {
       setPinError('Incorrect PIN. Try again.');
       setPin('');
