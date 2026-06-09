@@ -16,6 +16,7 @@ export default function Settings() {
   const [pinTarget, setPinTarget] = useState(null);
   const [pin, setPin] = useState('');
   const [pinError, setPinError] = useState('');
+  const [activeTab, setActiveTab] = useState('account');
 
   useEffect(() => {
     base44.entities.FamilyMember.list().then(setMembers);
@@ -26,6 +27,7 @@ export default function Settings() {
       setPinTarget(member);
       setPin('');
       setPinError('');
+      setActiveTab('account');
     } else {
       signIn(member);
     }
@@ -48,7 +50,7 @@ export default function Settings() {
         <p className="text-muted-foreground mt-1">Manage your account and preferences.</p>
       </div>
 
-      <Tabs defaultValue="account">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="w-full">
           <TabsTrigger value="account" className="flex-1">Account</TabsTrigger>
           <TabsTrigger value="auth" className="flex-1">Switch User</TabsTrigger>
