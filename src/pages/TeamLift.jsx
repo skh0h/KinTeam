@@ -7,9 +7,12 @@ import { Plus } from 'lucide-react';
 import TeamLiftForm from '@/components/teamlift/TeamLiftForm';
 import TeamLiftProject from '@/components/teamlift/TeamLiftProject';
 import { getCurrentWeekMonday } from '@/lib/weekUtils';
+import { useLocalUser } from '@/lib/LocalUserContext';
 
 export default function TeamLift() {
   const [formOpen, setFormOpen] = useState(false);
+  const { localUser } = useLocalUser();
+  const isAdmin = localUser?.role === 'admin';
   const queryClient = useQueryClient();
 
   const { data: tasks = [], isLoading } = useQuery({
@@ -84,9 +87,11 @@ export default function TeamLift() {
           <h1 className="font-display text-3xl font-bold tracking-tight">Team Lift</h1>
           <p className="text-muted-foreground mt-1">Break big chores into collaborative phases.</p>
         </div>
-        <Button onClick={() => setFormOpen(true)} className="rounded-xl">
-          <Plus className="w-4 h-4 mr-2" /> New Project
-        </Button>
+        {isAdmin && (
+          <Button onClick={() => setFormOpen(true)} className="rounded-xl">
+            <Plus className="w-4 h-4 mr-2" /> New Project
+          </Button>
+        )}
       </div>
 
       <div className="space-y-4">

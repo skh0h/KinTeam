@@ -6,9 +6,12 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Plus } from 'lucide-react';
 import TaskCard from '@/components/zones/TaskCard';
 import AddChoreDialog from '@/components/zones/AddChoreDialog';
+import { useLocalUser } from '@/lib/LocalUserContext';
 
 export default function Zones() {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const { localUser } = useLocalUser();
+  const isAdmin = localUser?.role === 'admin';
   const queryClient = useQueryClient();
 
   const { data: tasks = [], isLoading } = useQuery({
@@ -49,9 +52,11 @@ export default function Zones() {
           <h1 className="font-display text-3xl font-bold tracking-tight">Chores</h1>
           <p className="text-muted-foreground mt-1">All household chores in one place.</p>
         </div>
-        <Button className="rounded-xl gap-2" onClick={() => setAddDialogOpen(true)}>
-          <Plus className="w-4 h-4" /> Add Chore
-        </Button>
+        {isAdmin && (
+          <Button className="rounded-xl gap-2" onClick={() => setAddDialogOpen(true)}>
+            <Plus className="w-4 h-4" /> Add Chore
+          </Button>
+        )}
       </div>
 
       <div className="space-y-3">
