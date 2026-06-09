@@ -15,8 +15,7 @@
         "monthly",
         "as_needed"
       ],
-      "default": "weekly",
-      "description": "How often this chore recurs"
+      "default": "weekly"
     },
     "task_type": {
       "type": "string",
@@ -24,8 +23,7 @@
         "routine",
         "team_lift"
       ],
-      "default": "routine",
-      "description": "Whether this is a simple routine task or a team-lift project"
+      "default": "routine"
     },
     "phase": {
       "type": "string",
@@ -35,16 +33,13 @@
         "verification",
         "none"
       ],
-      "default": "none",
-      "description": "Phase for team-lift tasks"
+      "default": "none"
     },
     "parent_task_id": {
-      "type": "string",
-      "description": "For team-lift sub-tasks, the parent project ID"
+      "type": "string"
     },
     "assigned_to": {
-      "type": "string",
-      "description": "Name of the family member assigned"
+      "type": "string"
     },
     "status": {
       "type": "string",
@@ -73,8 +68,7 @@
     },
     "week_of": {
       "type": "string",
-      "format": "date",
-      "description": "The Monday of the week this task is for"
+      "format": "date"
     },
     "steps": {
       "type": "array",
@@ -87,13 +81,15 @@
           "text": {
             "type": "string"
           },
+          "assigned_to": {
+            "type": "string"
+          },
           "done": {
             "type": "boolean",
             "default": false
           }
         }
-      },
-      "description": "Optional checklist of steps for this phase task"
+      }
     }
   },
   "required": [

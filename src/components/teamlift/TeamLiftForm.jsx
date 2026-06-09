@@ -37,17 +37,17 @@ export default function TeamLiftForm({ open, onOpenChange, onSubmit, members }) 
       ...p,
       [phase]: {
         ...p[phase],
-        steps: [...p[phase].steps, { id: crypto.randomUUID(), text: '', done: false }],
+        steps: [...p[phase].steps, { id: crypto.randomUUID(), text: '', assigned_to: '', done: false }],
       },
     }));
   };
 
-  const updateStep = (phase, stepId, text) => {
+  const updateStep = (phase, stepId, field, value) => {
     setPhases(p => ({
       ...p,
       [phase]: {
         ...p[phase],
-        steps: p[phase].steps.map(s => s.id === stepId ? { ...s, text } : s),
+        steps: p[phase].steps.map(s => s.id === stepId ? { ...s, [field]: value } : s),
       },
     }));
   };
@@ -111,10 +111,19 @@ export default function TeamLiftForm({ open, onOpenChange, onSubmit, members }) 
                       <span className="text-xs text-muted-foreground w-4">{idx + 1}.</span>
                       <Input
                         value={step.text}
-                        onChange={(e) => updateStep(phase, step.id, e.target.value)}
+                        onChange={(e) => updateStep(phase, step.id, 'text', e.target.value)}
                         placeholder="Step description..."
-                        className="h-8 text-sm"
+                        className="h-8 text-sm flex-1"
                       />
+                      <Select value={step.assigned_to} onValueChange={(v) => updateStep(phase, step.id, 'assigned_to', v)}>
+                        <SelectTrigger className="h-8 w-28 text-xs">
+                          <SelectValue placeholder="Assign" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="unassigned">Anyone</SelectItem>
+                          {members.map(m => <SelectItem key={m.id} value={m.name}>{m.avatar_emoji} {m.name}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
                       <button type="button" onClick={() => removeStep(phase, step.id)} className="text-muted-foreground hover:text-destructive transition-colors">
                         <X className="w-3.5 h-3.5" />
                       </button>

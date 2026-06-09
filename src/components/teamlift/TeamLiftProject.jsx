@@ -99,9 +99,12 @@ export default function TeamLiftProject({ projectName, phases, onStatusChange, o
                         }`}>
                           {step.done && <span className="text-white text-[10px]">✓</span>}
                         </span>
-                        <span className={`text-xs ${step.done ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
+                        <span className={`text-xs flex-1 ${step.done ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
                           {step.text}
                         </span>
+                        {step.assigned_to && step.assigned_to !== 'unassigned' && (
+                          <span className="text-xs text-muted-foreground">{step.assigned_to}</span>
+                        )}
                       </button>
                     ))}
                   </div>
