@@ -25,7 +25,7 @@ export default function Dashboard() {
         <h1 className="font-display text-3xl font-bold tracking-tight">Welcome Home</h1>
       </div>
       <WeekOverview tasks={tasks} />
-      <TodayChoreList tasks={tasks} members={members} />
+      <TodayChoreList tasks={tasks} members={members} isAdmin={localUser?.role === 'admin'} />
       {localUser?.role === 'admin' && <AdminAlerts />}
       {localUser?.role === 'admin' && <QuickActions />}
     </div>
