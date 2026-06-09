@@ -24,7 +24,7 @@ export default function Dashboard() {
       {localUser?.role === 'admin' && <AdminAlerts />}
       <ChoreChart tasks={tasks} />
       <ChoreHistory tasks={tasks} isAdmin={localUser?.role === 'admin'} />
-      <QuickActions />
+      {localUser?.role === 'admin' && <QuickActions />}
     </div>
   );
 }
