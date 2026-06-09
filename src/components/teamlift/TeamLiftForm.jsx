@@ -19,10 +19,14 @@ export default function TeamLiftForm({ open, onOpenChange, onSubmit, members }) 
     verification: emptyPhase(),
   });
 
-  const handleSubmit = (e) => {
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!projectName.trim()) return;
-    onSubmit({ projectName, phases });
+    setLoading(true);
+    await onSubmit({ projectName, phases });
+    setLoading(false);
     setProjectName('');
     setPhases({ prep: emptyPhase(), execution: emptyPhase(), verification: emptyPhase() });
     onOpenChange(false);
@@ -142,8 +146,8 @@ export default function TeamLiftForm({ open, onOpenChange, onSubmit, members }) 
           })}
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <Button type="submit">Create Project</Button>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>Cancel</Button>
+            <Button type="submit" disabled={loading}>{loading ? 'Creating…' : 'Create Project'}</Button>
           </DialogFooter>
         </form>
       </DialogContent>
