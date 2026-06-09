@@ -27,15 +27,15 @@ export default function Settings() {
     setPwError('');
     setPwSuccess(false);
     if (!newPassword || !confirmPassword) {
-      setPwError('Please fill in all fields.');
+      setPwError('Please fill in both fields.');
+      return;
+    }
+    if (!/^\d{4,10}$/.test(newPassword)) {
+      setPwError('PIN must be 4–10 digits (numbers only).');
       return;
     }
     if (newPassword !== confirmPassword) {
-      setPwError('New passwords do not match.');
-      return;
-    }
-    if (newPassword.length < 6) {
-      setPwError('Password must be at least 6 characters.');
+      setPwError('PINs do not match.');
       return;
     }
     await base44.auth.updateMe({ password: newPassword });
@@ -121,32 +121,36 @@ export default function Settings() {
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-2">
                   <KeyRound className="w-5 h-5 text-primary" />
-                  <CardTitle className="font-display text-lg">Change Password</CardTitle>
+                  <CardTitle className="font-display text-lg">Change PIN</CardTitle>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   <div className="space-y-1">
-                    <Label>New Password</Label>
+                    <Label>New PIN</Label>
                     <Input
                       type="password"
-                      placeholder="New password"
+                      inputMode="numeric"
+                      placeholder="4–10 digit PIN"
+                      maxLength={10}
                       value={newPassword}
-                      onChange={(e) => { setNewPassword(e.target.value); setPwError(''); setPwSuccess(false); }}
+                      onChange={(e) => { setNewPassword(e.target.value.replace(/\D/g, '')); setPwError(''); setPwSuccess(false); }}
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label>Confirm New Password</Label>
+                    <Label>Confirm New PIN</Label>
                     <Input
                       type="password"
-                      placeholder="Confirm new password"
+                      inputMode="numeric"
+                      placeholder="Confirm PIN"
+                      maxLength={10}
                       value={confirmPassword}
-                      onChange={(e) => { setConfirmPassword(e.target.value); setPwError(''); setPwSuccess(false); }}
+                      onChange={(e) => { setConfirmPassword(e.target.value.replace(/\D/g, '')); setPwError(''); setPwSuccess(false); }}
                     />
                   </div>
                   {pwError && <p className="text-xs text-destructive">{pwError}</p>}
-                  {pwSuccess && <p className="text-xs text-emerald-600">Password updated successfully.</p>}
-                  <Button className="w-full" onClick={handleChangePassword}>Update Password</Button>
+                  {pwSuccess && <p className="text-xs text-emerald-600">PIN updated successfully.</p>}
+                  <Button className="w-full" onClick={handleChangePassword}>Update PIN</Button>
                 </div>
               </CardContent>
             </Card>
