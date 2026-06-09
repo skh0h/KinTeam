@@ -97,8 +97,11 @@ export default function ChoreHistory({ tasks, isAdmin }) {
         <ResponsiveContainer width="100%" height={180}>
           <BarChart data={chartData} barSize={28} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
             <XAxis dataKey="day" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} />
-            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--muted))', radius: 6 }} />
+            <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} domain={[0, 'dataMax']} />
+            <Tooltip content={<CustomTooltip />} cursor={false} />
+            {/* Background bar: total chores */}
+            <Bar dataKey="total" radius={[6, 6, 0, 0]} fill="hsl(var(--muted))" opacity={0.5} />
+            {/* Foreground bar: done chores */}
             <Bar dataKey="done" radius={[6, 6, 0, 0]}>
               {chartData.map((entry, i) => {
                 const isToday = activeWeek === getWeekMonday(0) && i === todayDowIndex;
@@ -107,7 +110,7 @@ export default function ChoreHistory({ tasks, isAdmin }) {
                     key={i}
                     fill={
                       entry.hidden ? 'hsl(var(--muted))' :
-                      entry.total === 0 ? 'hsl(var(--muted))' :
+                      entry.total === 0 ? 'transparent' :
                       entry.pct === 100 ? 'hsl(var(--accent))' :
                       isToday ? 'hsl(var(--primary))' :
                       'hsl(var(--chart-2))'
