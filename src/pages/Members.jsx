@@ -6,11 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { UserPlus, Trash2, Shield, User } from 'lucide-react';
-import { useAuth } from '@/lib/AuthContext';
+import { useLocalUser } from '@/lib/LocalUserContext';
 import { Navigate } from 'react-router-dom';
 
 export default function Members() {
-  const { user } = useAuth();
+  const { localUser } = useLocalUser();
   const queryClient = useQueryClient();
   const [form, setForm] = useState({ name: '', display_name: '', avatar_emoji: '', role: 'user' });
 
@@ -31,6 +31,10 @@ export default function Members() {
     mutationFn: (id) => base44.entities.FamilyMember.delete(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['members'] }),
   });
+
+  if (localUser && localUser.role !== 'admin') {
+    return <Navigate to="/" replace />;
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault();
