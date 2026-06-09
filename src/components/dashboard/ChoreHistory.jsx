@@ -1,16 +1,31 @@
 import { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle2, XCircle, ChevronDown, ChevronUp, History } from 'lucide-react';
-import { format, startOfWeek, subWeeks } from 'date-fns';
+import { format, startOfWeek, subWeeks, getDay } from 'date-fns';
 import { getCurrentWeekMonday } from '@/lib/weekUtils';
+
+// day-of-week index (0=Sun) for each due_day value
+const DAY_INDEX = { sunday: 0, monday: 1, tuesday: 2, wednesday: 3, thursday: 4, friday: 5, saturday: 6 };
+
+// Returns true if the task's due_day has already passed (or today) relative to now
+// For past weeks, all days have passed — always true
+function isDayRevealed(task, isLastWeek) {
+  if (!isLastWeek) return true; // past weeks: always reveal
+  if (!task.due_day || task.due_day === 'any') return true; // no specific day: always show
+  const todayIndex = getDay(new Date()); // 0=Sun
+  const taskDayIndex = DAY_INDEX[task.due_day];
+  return taskDayIndex !== undefined ? taskDayIndex <= todayIndex : true;
+}
 
 function getWeekMonday(weeksAgo) {
   return format(startOfWeek(subWeeks(new Date(), weeksAgo), { weekStartsOn: 1 }), 'yyyy-MM-dd');
 }
 
-function WeekRow({ weekOf, tasks, defaultOpen }) {
+function WeekRow({ weekOf, tasks, defaultOpen, isAdmin, isLastWeek }) {
   const [isOpen, setIsOpen] = useState(defaultOpen || false);
-  const weekTasks = tasks.filter(t => t.task_type === 'routine' && t.week_of === weekOf);
+  const allWeekTasks = tasks.filter(t => t.task_type === 'routine' && t.week_of === weekOf);
+  // Non-admins only see tasks whose due_day has passed
+  const weekTasks = isAdmin ? allWeekTasks : allWeekTasks.filter(t => isDayRevealed(t, isLastWeek));
   const done = weekTasks.filter(t => t.status === 'done');
   const notDone = weekTasks.filter(t => t.status !== 'done');
   const total = weekTasks.length;
@@ -98,7 +113,7 @@ export default function ChoreHistory({ tasks, isAdmin }) {
         </div>
       </CardHeader>
       <CardContent className="space-y-2 p-4 pt-0">
-        <WeekRow weekOf={lastWeek} tasks={tasks} defaultOpen={true} />
+        <WeekRow weekOf={lastWeek} tasks={tasks} defaultOpen={true} isAdmin={isAdmin} isLastWeek={true} />
 
         {isAdmin && olderWeeks.length > 0 && (
           <>
@@ -110,7 +125,7 @@ export default function ChoreHistory({ tasks, isAdmin }) {
               {showOlder ? 'Hide older weeks' : 'Show older weeks'}
             </button>
             {showOlder && olderWeeks.map(weekOf => (
-              <WeekRow key={weekOf} weekOf={weekOf} tasks={tasks} />
+              <WeekRow key={weekOf} weekOf={weekOf} tasks={tasks} isAdmin={isAdmin} isLastWeek={false} />
             ))}
           </>
         )}
