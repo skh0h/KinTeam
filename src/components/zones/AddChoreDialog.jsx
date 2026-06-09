@@ -25,7 +25,7 @@ const DAYS = [
   { value: 'sunday', label: 'Sunday' },
 ];
 
-const empty = { title: '', occurrence: 'weekly', priority: 'medium', due_day: 'any', notes: '' };
+const empty = { title: '', occurrence: 'weekly', priority: 'medium', due_day: 'any', notes: '', assigned_to: '' };
 
 export default function AddChoreDialog({ open, onOpenChange, onSubmit, members }) {
   const [form, setForm] = useState(empty);
@@ -33,7 +33,7 @@ export default function AddChoreDialog({ open, onOpenChange, onSubmit, members }
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!form.title.trim()) return;
-    onSubmit({ ...form, assigned_to: '' });
+    onSubmit({ ...form });
     setForm(empty);
   };
 
@@ -89,6 +89,21 @@ export default function AddChoreDialog({ open, onOpenChange, onSubmit, members }
               <SelectContent>
                 {DAYS.map(d => (
                   <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label>Assign To (optional)</Label>
+            <Select value={form.assigned_to} onValueChange={(v) => set('assigned_to', v)}>
+              <SelectTrigger className="mt-1"><SelectValue placeholder="Unassigned" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value={null}>Unassigned</SelectItem>
+                {(members || []).map(m => (
+                  <SelectItem key={m.id} value={m.id}>
+                    {m.avatar_emoji ? `${m.avatar_emoji} ` : ''}{m.display_name || m.name}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
