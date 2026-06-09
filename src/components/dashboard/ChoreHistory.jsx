@@ -1,134 +1,129 @@
-import { useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle2, XCircle, ChevronDown, ChevronUp, History } from 'lucide-react';
-import { format, startOfWeek, subWeeks, getDay } from 'date-fns';
-import { getCurrentWeekMonday } from '@/lib/weekUtils';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart2 } from 'lucide-react';
+import { startOfWeek, subWeeks, format, getDay } from 'date-fns';
 
-// day-of-week index (0=Sun) for each due_day value
-const DAY_INDEX = { sunday: 0, monday: 1, tuesday: 2, wednesday: 3, thursday: 4, friday: 5, saturday: 6 };
-
-// Returns true if the task's due_day has already passed (or today) relative to now
-// For past weeks, all days have passed — always true
-function isDayRevealed(task, isLastWeek) {
-  if (!isLastWeek) return true; // past weeks: always reveal
-  if (!task.due_day || task.due_day === 'any') return true; // no specific day: always show
-  const todayIndex = getDay(new Date()); // 0=Sun
-  const taskDayIndex = DAY_INDEX[task.due_day];
-  return taskDayIndex !== undefined ? taskDayIndex <= todayIndex : true;
-}
+const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const DAY_INDEX = { monday: 0, tuesday: 1, wednesday: 2, thursday: 3, friday: 4, saturday: 5, sunday: 6 };
 
 function getWeekMonday(weeksAgo) {
   return format(startOfWeek(subWeeks(new Date(), weeksAgo), { weekStartsOn: 1 }), 'yyyy-MM-dd');
 }
 
-function WeekRow({ weekOf, tasks, defaultOpen, isAdmin, isLastWeek }) {
-  const [isOpen, setIsOpen] = useState(defaultOpen || false);
-  const allWeekTasks = tasks.filter(t => t.task_type === 'routine' && t.week_of === weekOf);
-  // Non-admins only see tasks whose due_day has passed
-  const weekTasks = isAdmin ? allWeekTasks : allWeekTasks.filter(t => isDayRevealed(t, isLastWeek));
-  const done = weekTasks.filter(t => t.status === 'done');
-  const notDone = weekTasks.filter(t => t.status !== 'done');
-  const total = weekTasks.length;
-  const pct = total > 0 ? Math.round((done.length / total) * 100) : null;
+function buildDayData(tasks, weekOf, isAdmin) {
+  const weekTasks = tasks.filter(t => t.task_type === 'routine' && t.week_of === weekOf);
+  const todayDowIndex = (getDay(new Date()) + 6) % 7; // convert Sun=0 to Mon=0
 
+  return DAYS.map((day, i) => {
+    const dayTasks = weekTasks.filter(t => {
+      const idx = DAY_INDEX[t.due_day];
+      return idx === i;
+    });
+    // Non-admins: hide future days in current week
+    const isCurrentWeek = weekOf === getWeekMonday(0);
+    const hidden = !isAdmin && isCurrentWeek && i > todayDowIndex;
+    const done = dayTasks.filter(t => t.status === 'done').length;
+    const total = dayTasks.length;
+    return { day, done, total, pct: total > 0 ? Math.round((done / total) * 100) : 0, hidden };
+  });
+}
+
+const CustomTooltip = ({ active, payload, label }) => {
+  if (!active || !payload?.length) return null;
+  const { done, total, pct } = payload[0].payload;
   return (
-    <div className="rounded-xl border overflow-hidden">
-      <button
-        className="w-full flex items-center justify-between px-4 py-3 hover:bg-muted/40 transition-colors text-left"
-        onClick={() => setIsOpen(v => !v)}
-      >
-        <div className="flex items-center gap-3">
-          <span className="font-medium text-sm">
-            Week of {format(new Date(weekOf + 'T00:00:00'), 'MMM d')}
-          </span>
-          {pct !== null ? (
-            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-              pct === 100 ? 'bg-emerald-100 text-emerald-700' :
-              pct >= 50 ? 'bg-amber-100 text-amber-700' :
-              'bg-red-100 text-red-700'
-            }`}>{pct}%</span>
-          ) : (
-            <span className="text-xs text-muted-foreground">No data</span>
-          )}
-        </div>
-        <div className="flex items-center gap-3">
-          {total > 0 && <span className="text-xs text-muted-foreground">{done.length}/{total}</span>}
-          {isOpen ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
-        </div>
-      </button>
-
-      {isOpen && (
-        <div className="px-4 pb-3 pt-1 space-y-1 bg-muted/20">
-          {total === 0 ? (
-            <p className="text-xs text-muted-foreground py-2">No chores recorded for this week.</p>
-          ) : (
-            <>
-              {done.map(t => (
-                <div key={t.id} className="flex items-center gap-2 py-1">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                  <span className="text-sm text-muted-foreground line-through">{t.title}</span>
-                  {t.assigned_to && <span className="text-xs text-muted-foreground ml-auto">{t.assigned_to}</span>}
-                </div>
-              ))}
-              {notDone.map(t => (
-                <div key={t.id} className="flex items-center gap-2 py-1">
-                  <XCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
-                  <span className="text-sm">{t.title}</span>
-                  {t.assigned_to && <span className="text-xs text-muted-foreground ml-auto">{t.assigned_to}</span>}
-                </div>
-              ))}
-            </>
-          )}
-        </div>
+    <div className="bg-card border rounded-lg px-3 py-2 text-xs shadow-md">
+      <p className="font-medium mb-1">{label}</p>
+      {total > 0 ? (
+        <>
+          <p className="text-emerald-600">{done} done</p>
+          <p className="text-muted-foreground">{total - done} remaining</p>
+          <p className="font-semibold mt-1">{pct}%</p>
+        </>
+      ) : (
+        <p className="text-muted-foreground">No chores</p>
       )}
     </div>
   );
-}
+};
 
 export default function ChoreHistory({ tasks, isAdmin }) {
-  const [showOlder, setShowOlder] = useState(false);
+  const weeks = useMemo(() => {
+    const result = [];
+    for (let i = 0; i <= (isAdmin ? 3 : 0); i++) {
+      result.push({ weekOf: getWeekMonday(i), weeksAgo: i });
+    }
+    return result;
+  }, [isAdmin]);
 
-  const lastWeek = useMemo(() => getWeekMonday(1), []);
+  const [activeWeek, setActiveWeek] = useState(() => getWeekMonday(0));
 
-  const olderWeeks = useMemo(() => {
-    if (!isAdmin) return [];
-    const currentWeek = getCurrentWeekMonday();
-    const weekSet = new Set(
-      tasks
-        .filter(t => t.task_type === 'routine' && t.week_of && t.week_of < lastWeek)
-        .map(t => t.week_of)
-    );
-    for (let i = 2; i <= 6; i++) weekSet.add(getWeekMonday(i));
-    weekSet.delete(currentWeek);
-    weekSet.delete(lastWeek);
-    return Array.from(weekSet).sort((a, b) => b.localeCompare(a)).slice(0, 5);
-  }, [tasks, isAdmin, lastWeek]);
+  const chartData = useMemo(() => buildDayData(tasks, activeWeek, isAdmin), [tasks, activeWeek, isAdmin]);
+
+  const todayDowIndex = (getDay(new Date()) + 6) % 7;
 
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <div className="flex items-center gap-2">
-          <History className="w-5 h-5 text-primary" />
-          <CardTitle className="font-display text-lg">Chore History</CardTitle>
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <BarChart2 className="w-5 h-5 text-primary" />
+            <CardTitle className="font-display text-lg">Chore Chart</CardTitle>
+          </div>
+          {isAdmin && (
+            <div className="flex gap-1">
+              {weeks.map(({ weekOf, weeksAgo }) => (
+                <button
+                  key={weekOf}
+                  onClick={() => setActiveWeek(weekOf)}
+                  className={`text-xs px-2 py-1 rounded-md transition-colors ${
+                    activeWeek === weekOf
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                  }`}
+                >
+                  {weeksAgo === 0 ? 'This wk' : weeksAgo === 1 ? 'Last wk' : `-${weeksAgo}w`}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
+        <p className="text-xs text-muted-foreground">
+          Week of {format(new Date(activeWeek + 'T00:00:00'), 'MMM d')}
+        </p>
       </CardHeader>
-      <CardContent className="space-y-2 p-4 pt-0">
-        <WeekRow weekOf={lastWeek} tasks={tasks} defaultOpen={true} isAdmin={isAdmin} isLastWeek={true} />
-
-        {isAdmin && olderWeeks.length > 0 && (
-          <>
-            <button
-              className="w-full text-xs text-muted-foreground hover:text-foreground flex items-center justify-center gap-1 pt-1 transition-colors"
-              onClick={() => setShowOlder(v => !v)}
-            >
-              {showOlder ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-              {showOlder ? 'Hide older weeks' : 'Show older weeks'}
-            </button>
-            {showOlder && olderWeeks.map(weekOf => (
-              <WeekRow key={weekOf} weekOf={weekOf} tasks={tasks} isAdmin={isAdmin} isLastWeek={false} />
-            ))}
-          </>
-        )}
+      <CardContent className="pt-2 pb-4">
+        <ResponsiveContainer width="100%" height={180}>
+          <BarChart data={chartData} barSize={28} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
+            <XAxis dataKey="day" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--muted))', radius: 6 }} />
+            <Bar dataKey="done" radius={[6, 6, 0, 0]}>
+              {chartData.map((entry, i) => {
+                const isToday = activeWeek === getWeekMonday(0) && i === todayDowIndex;
+                return (
+                  <Cell
+                    key={i}
+                    fill={
+                      entry.hidden ? 'hsl(var(--muted))' :
+                      entry.total === 0 ? 'hsl(var(--muted))' :
+                      entry.pct === 100 ? 'hsl(var(--accent))' :
+                      isToday ? 'hsl(var(--primary))' :
+                      'hsl(var(--chart-2))'
+                    }
+                    opacity={entry.hidden ? 0.3 : 1}
+                  />
+                );
+              })}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+        <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-accent inline-block" /> All done</span>
+          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-[hsl(var(--chart-2))] inline-block" /> Partial</span>
+          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-muted inline-block" /> None</span>
+        </div>
       </CardContent>
     </Card>
   );
