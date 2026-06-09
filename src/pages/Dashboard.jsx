@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/react-query';
 import QuickActions from '@/components/dashboard/QuickActions';
 import WeekOverview from '@/components/dashboard/WeekOverview';
 import AdminAlerts from '@/components/dashboard/AdminAlerts';
-import ChoreHistory from '@/components/dashboard/ChoreHistory';
 import { useLocalUser } from '@/lib/LocalUserContext';
 
 export default function Dashboard() {
@@ -21,7 +20,6 @@ export default function Dashboard() {
       </div>
       <WeekOverview tasks={tasks} />
       {localUser?.role === 'admin' && <AdminAlerts />}
-      <ChoreHistory tasks={tasks} isAdmin={localUser?.role === 'admin'} />
       {localUser?.role === 'admin' && <QuickActions />}
     </div>
   );
