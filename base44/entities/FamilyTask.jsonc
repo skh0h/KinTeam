@@ -86,6 +86,10 @@
     "notes": {
       "type": "string"
     },
+    "photo_url": {
+      "type": "string",
+      "description": "Optional reference photo for the chore"
+    },
     "week_of": {
       "type": "string",
       "format": "date"

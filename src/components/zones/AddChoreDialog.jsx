@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import { base44 } from '@/api/base44Client';
+import { ImagePlus, X, Loader2 } from 'lucide-react';
 
 const OCCURRENCES = [
   { value: 'daily', label: 'Daily' },
@@ -25,10 +27,21 @@ const DAYS = [
   { value: 'sunday', label: 'Sunday' },
 ];
 
-const empty = { title: '', occurrence: 'weekly', priority: 'medium', due_day: 'any', notes: '', assigned_to: '', permanent_assigned_to: '' };
+const empty = { title: '', occurrence: 'weekly', priority: 'medium', due_day: 'any', notes: '', assigned_to: '', permanent_assigned_to: '', photo_url: '' };
 
 export default function AddChoreDialog({ open, onOpenChange, onSubmit, members }) {
   const [form, setForm] = useState(empty);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const handlePhotoChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    setForm(f => ({ ...f, photo_url: file_url }));
+    setUploading(false);
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -126,6 +139,33 @@ export default function AddChoreDialog({ open, onOpenChange, onSubmit, members }
           </div>
 
           <div>
+            <Label>Reference Photo (optional)</Label>
+            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
+            {form.photo_url ? (
+              <div className="relative mt-1 w-full h-36 rounded-lg overflow-hidden border">
+                <img src={form.photo_url} alt="Chore reference" className="w-full h-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => setForm(f => ({ ...f, photo_url: '' }))}
+                  className="absolute top-1.5 right-1.5 bg-black/60 text-white rounded-full p-0.5 hover:bg-black/80"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="mt-1 w-full h-20 flex flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-muted-foreground/30 text-muted-foreground hover:border-primary/50 hover:text-primary transition-colors disabled:opacity-50"
+              >
+                {uploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ImagePlus className="w-5 h-5" />}
+                <span className="text-xs">{uploading ? 'Uploading…' : 'Upload photo'}</span>
+              </button>
+            )}
+          </div>
+
+          <div>
             <Label>Notes (optional)</Label>
             <Textarea
               value={form.notes}
@@ -137,7 +177,7 @@ export default function AddChoreDialog({ open, onOpenChange, onSubmit, members }
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <Button type="submit">Add Chore</Button>
+            <Button type="submit" disabled={uploading}>Add Chore</Button>
           </DialogFooter>
         </form>
       </DialogContent>
