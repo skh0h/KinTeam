@@ -124,7 +124,9 @@ export default function TodayChoreList({ tasks, members, isAdmin }) {
                     done ? 'bg-accent/10' : 'bg-muted/40'
                   }`}
                 >
-                  {done
+                  {chore.photo_url ? (
+                    <img src={chore.photo_url} alt={chore.title} className="w-8 h-8 rounded-md object-cover flex-shrink-0" />
+                  ) : done
                     ? <CheckCircle2 className="w-5 h-5 text-accent flex-shrink-0" />
                     : <Circle className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                   }

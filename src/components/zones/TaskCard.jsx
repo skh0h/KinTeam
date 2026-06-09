@@ -21,6 +21,9 @@ export default function TaskCard({ task, onStatusChange, onDelete, onAssign, onP
       <Card className={cn('transition-all', task.status === 'done' && 'opacity-60')}>
         <CardContent className="p-4">
           <div className="flex items-start justify-between gap-2">
+            {task.photo_url && (
+              <img src={task.photo_url} alt={task.title} className="w-12 h-12 rounded-lg object-cover shrink-0" />
+            )}
             <div className="flex-1 min-w-0">
               <p className={cn('font-medium text-sm', task.status === 'done' && 'line-through text-muted-foreground')}>
                 {task.title}
@@ -48,9 +51,6 @@ export default function TaskCard({ task, onStatusChange, onDelete, onAssign, onP
               </div>
               {task.notes && (
                 <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{task.notes}</p>
-              )}
-              {task.photo_url && (
-                <img src={task.photo_url} alt="Chore reference" className="mt-2 w-full max-h-40 object-cover rounded-lg" />
               )}
             </div>
             <DropdownMenu>
