@@ -12,10 +12,16 @@ export default function WeekOverview({ tasks }) {
   const choresDone = choreTasks.filter(t => t.status === 'done').length;
   const teamLiftDone = teamLiftTasks.filter(t => t.status === 'done').length;
 
-  const choreProgress = choreTasks.length > 0 ? choresDone / choreTasks.length : 0;
-  const teamLiftProgress = teamLiftTasks.length > 0 ? teamLiftDone / teamLiftTasks.length : 0;
+  const hasTeamLift = teamLiftTasks.length > 0;
 
-  const progress = Math.round((choreProgress * 0.75 + teamLiftProgress * 0.25) * 100);
+  const choreProgress = choreTasks.length > 0 ? choresDone / choreTasks.length : 0;
+  const teamLiftProgress = hasTeamLift ? teamLiftDone / teamLiftTasks.length : 0;
+
+  const progress = Math.round(
+    hasTeamLift
+      ? (choreProgress * 0.75 + teamLiftProgress * 0.25) * 100
+      : choreProgress * 100
+  );
 
   const stats = [
     { label: 'Chores Done', value: `${choresDone}/${choreTasks.length}`, icon: CheckCircle2, color: 'text-primary' },
@@ -35,20 +41,22 @@ export default function WeekOverview({ tasks }) {
           </div>
         </div>
 
-        {/* Segmented progress bar: chores (75%) + team lift (25%) */}
+        {/* Segmented progress bar */}
         <div className="relative h-2.5 bg-muted rounded-full overflow-hidden mb-2">
           <div
             className="absolute left-0 top-0 h-full bg-primary transition-all duration-700"
-            style={{ width: `${choreProgress * 75}%` }}
+            style={{ width: `${hasTeamLift ? choreProgress * 75 : choreProgress * 100}%` }}
           />
-          <div
-            className="absolute top-0 h-full bg-accent transition-all duration-700"
-            style={{ left: `${choreProgress * 75}%`, width: `${teamLiftProgress * 25}%` }}
-          />
+          {hasTeamLift && (
+            <div
+              className="absolute top-0 h-full bg-accent transition-all duration-700"
+              style={{ left: `${choreProgress * 75}%`, width: `${teamLiftProgress * 25}%` }}
+            />
+          )}
         </div>
         <div className="flex justify-between text-xs text-muted-foreground mb-4">
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-primary inline-block" />Chores 75%</span>
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-accent inline-block" />Team Lift 25%</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-primary inline-block" />Chores {hasTeamLift ? '75%' : '100%'}</span>
+          {hasTeamLift && <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-accent inline-block" />Team Lift 25%</span>}
         </div>
 
         <div className="grid grid-cols-2 gap-3">
