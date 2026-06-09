@@ -33,7 +33,13 @@ export default function Members() {
   });
 
   if (localUser && localUser.role !== 'admin') {
-    return <Navigate to="/" replace />;
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center">
+        <span className="text-5xl">🔒</span>
+        <h2 className="font-display text-2xl font-bold">Admin Only</h2>
+        <p className="text-muted-foreground max-w-xs">You don't have permission to view this page. Contact an admin if you think this is a mistake.</p>
+      </div>
+    );
   }
 
   const handleSubmit = (e) => {
