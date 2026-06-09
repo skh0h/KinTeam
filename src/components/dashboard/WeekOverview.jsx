@@ -40,17 +40,14 @@ export default function WeekOverview({ tasks }) {
         <div className="h-2.5 bg-muted rounded-full overflow-hidden mb-2 flex gap-0.5">
           <motion.div
             className="h-full bg-primary rounded-l-full"
-            style={{ width: '75%' }}
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: choreProgress }}
-            style={{ width: `${choreProgress * 75}%` }}
+            initial={{ width: '0%' }}
+            animate={{ width: `${choreProgress * 75}%` }}
             transition={{ duration: 0.8, ease: 'easeOut' }}
           />
           <motion.div
             className="h-full bg-accent rounded-r-full"
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: teamLiftProgress }}
-            style={{ width: `${teamLiftProgress * 25}%` }}
+            initial={{ width: '0%' }}
+            animate={{ width: `${teamLiftProgress * 25}%` }}
             transition={{ duration: 0.8, ease: 'easeOut', delay: 0.1 }}
           />
         </div>
