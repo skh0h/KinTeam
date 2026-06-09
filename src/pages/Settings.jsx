@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-import { Settings as SettingsIcon, LogOut, Shield } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Settings as SettingsIcon, LogOut, Shield, KeyRound } from 'lucide-react';
 import { useLocalUser } from '@/lib/LocalUserContext';
 import { base44 } from '@/api/base44Client';
 
@@ -17,6 +18,31 @@ export default function Settings() {
   const [pin, setPin] = useState('');
   const [pinError, setPinError] = useState('');
   const [activeTab, setActiveTab] = useState(() => localUser ? 'account' : 'auth');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [pwError, setPwError] = useState('');
+  const [pwSuccess, setPwSuccess] = useState(false);
+
+  const handleChangePassword = async () => {
+    setPwError('');
+    setPwSuccess(false);
+    if (!newPassword || !confirmPassword) {
+      setPwError('Please fill in all fields.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPwError('New passwords do not match.');
+      return;
+    }
+    if (newPassword.length < 6) {
+      setPwError('Password must be at least 6 characters.');
+      return;
+    }
+    await base44.auth.updateMe({ password: newPassword });
+    setPwSuccess(true);
+    setNewPassword('');
+    setConfirmPassword('');
+  };
 
   useEffect(() => {
     base44.entities.FamilyMember.list().then(setMembers);
@@ -89,6 +115,42 @@ export default function Settings() {
               )}
             </CardContent>
           </Card>
+
+          {localUser?.role === 'admin' && !pinTarget && (
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-2">
+                  <KeyRound className="w-5 h-5 text-primary" />
+                  <CardTitle className="font-display text-lg">Change Password</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="space-y-1">
+                    <Label>New Password</Label>
+                    <Input
+                      type="password"
+                      placeholder="New password"
+                      value={newPassword}
+                      onChange={(e) => { setNewPassword(e.target.value); setPwError(''); setPwSuccess(false); }}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Confirm New Password</Label>
+                    <Input
+                      type="password"
+                      placeholder="Confirm new password"
+                      value={confirmPassword}
+                      onChange={(e) => { setConfirmPassword(e.target.value); setPwError(''); setPwSuccess(false); }}
+                    />
+                  </div>
+                  {pwError && <p className="text-xs text-destructive">{pwError}</p>}
+                  {pwSuccess && <p className="text-xs text-emerald-600">Password updated successfully.</p>}
+                  <Button className="w-full" onClick={handleChangePassword}>Update Password</Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {pinTarget && (
             <Card className="border-primary/30 bg-primary/5">
