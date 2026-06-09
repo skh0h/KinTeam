@@ -7,7 +7,7 @@ import { getCurrentWeekMonday } from '@/lib/weekUtils';
 const DOW_MAP = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 const WEEK_DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
-export default function TodayChoreList({ tasks, members, isAdmin }) {
+export default function TodayChoreList({ tasks, members, isAdmin, onToggle }) {
   const today = new Date();
   const todayDowIndex = (getDay(today) + 6) % 7; // Mon=0 ... Sun=6
   const weekOf = getCurrentWeekMonday();
@@ -120,16 +120,18 @@ export default function TodayChoreList({ tasks, members, isAdmin }) {
               return (
                 <li
                   key={chore.id}
-                  className={`flex items-center gap-3 p-2.5 rounded-lg transition-colors ${
-                    done ? 'bg-accent/10' : 'bg-muted/40'
+                  onClick={() => onToggle && onToggle(chore.id, done ? 'pending' : 'done')}
+                  className={`flex items-center gap-3 p-2.5 rounded-lg transition-colors cursor-pointer ${
+                    done ? 'bg-accent/10 hover:bg-accent/20' : 'bg-muted/40 hover:bg-muted'
                   }`}
                 >
-                  {chore.photo_url ? (
-                    <img src={chore.photo_url} alt={chore.title} className="w-8 h-8 rounded-md object-cover flex-shrink-0" />
-                  ) : done
+                  {done
                     ? <CheckCircle2 className="w-5 h-5 text-accent flex-shrink-0" />
                     : <Circle className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                   }
+                  {chore.photo_url && (
+                    <img src={chore.photo_url} alt={chore.title} className="w-8 h-8 rounded-md object-cover flex-shrink-0" />
+                  )}
                   <span className={`flex-1 text-sm font-medium ${done ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
                     {chore.title}
                   </span>

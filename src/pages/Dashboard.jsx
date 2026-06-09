@@ -1,5 +1,5 @@
 import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import WeekOverview from '@/components/dashboard/WeekOverview';
 import AdminAlerts from '@/components/dashboard/AdminAlerts';
 import TodayChoreList from '@/components/dashboard/TodayChoreList';
@@ -7,6 +7,12 @@ import { useLocalUser } from '@/lib/LocalUserContext';
 
 export default function Dashboard() {
   const { localUser } = useLocalUser();
+  const queryClient = useQueryClient();
+
+  const toggleChore = useMutation({
+    mutationFn: ({ id, status }) => base44.entities.FamilyTask.update(id, { status }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['tasks'] }),
+  });
 
   const { data: tasks = [] } = useQuery({
     queryKey: ['tasks'],
@@ -24,7 +30,7 @@ export default function Dashboard() {
         <h1 className="font-display text-3xl font-bold tracking-tight">Welcome Home</h1>
       </div>
       <WeekOverview tasks={tasks} />
-      <TodayChoreList tasks={tasks} members={members} isAdmin={localUser?.role === 'admin'} />
+      <TodayChoreList tasks={tasks} members={members} isAdmin={localUser?.role === 'admin'} onToggle={(id, status) => toggleChore.mutate({ id, status })} />
       {localUser?.role === 'admin' && <AdminAlerts />}
     </div>
   );
