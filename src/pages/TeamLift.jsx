@@ -56,6 +56,7 @@ export default function TeamLift() {
           parent_task_id: parent.id,
           assigned_to: phaseData.assigned_to || '',
           notes: phaseData.notes || '',
+          steps: (phaseData.steps || []).filter(s => s.text.trim()),
           status: 'pending',
           week_of: getCurrentWeekMonday(),
         });

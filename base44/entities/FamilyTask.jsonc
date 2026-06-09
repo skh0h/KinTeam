@@ -75,6 +75,25 @@
       "type": "string",
       "format": "date",
       "description": "The Monday of the week this task is for"
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "done": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
+      "description": "Optional checklist of steps for this phase task"
     }
   },
   "required": [
