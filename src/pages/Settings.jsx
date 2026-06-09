@@ -1,21 +1,44 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Settings as SettingsIcon, LogOut } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Settings as SettingsIcon, LogOut, Shield } from 'lucide-react';
 import { useLocalUser } from '@/lib/LocalUserContext';
 import { base44 } from '@/api/base44Client';
+
+const ADMIN_PIN = '1234';
 
 export default function Settings() {
   const { localUser, signIn, signOut } = useLocalUser();
   const [members, setMembers] = useState([]);
+  const [pinTarget, setPinTarget] = useState(null);
+  const [pin, setPin] = useState('');
+  const [pinError, setPinError] = useState('');
 
   useEffect(() => {
     base44.entities.FamilyMember.list().then(setMembers);
   }, []);
 
   const handleSwitch = (member) => {
-    signIn(member);
+    if (member.role === 'admin') {
+      setPinTarget(member);
+      setPin('');
+      setPinError('');
+    } else {
+      signIn(member);
+    }
+  };
+
+  const handlePinSubmit = () => {
+    if (pin === ADMIN_PIN) {
+      signIn(pinTarget);
+      setPinTarget(null);
+    } else {
+      setPinError('Incorrect PIN. Try again.');
+      setPin('');
+    }
   };
 
   return (
@@ -96,6 +119,31 @@ export default function Settings() {
           </Card>
         </TabsContent>
       </Tabs>
+      {/* Admin PIN Dialog */}
+      <Dialog open={!!pinTarget} onOpenChange={(open) => { if (!open) setPinTarget(null); }}>
+        <DialogContent className="max-w-xs">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 font-display">
+              <Shield className="w-4 h-4 text-primary" /> Admin PIN Required
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 pt-1">
+            <p className="text-sm text-muted-foreground">
+              Enter the admin PIN to sign in as <strong>{pinTarget?.display_name || pinTarget?.name}</strong>.
+            </p>
+            <Input
+              type="password"
+              placeholder="PIN"
+              value={pin}
+              onChange={(e) => { setPin(e.target.value); setPinError(''); }}
+              onKeyDown={(e) => e.key === 'Enter' && handlePinSubmit()}
+              autoFocus
+            />
+            {pinError && <p className="text-xs text-destructive">{pinError}</p>}
+            <Button className="w-full" onClick={handlePinSubmit}>Confirm</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
