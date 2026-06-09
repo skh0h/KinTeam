@@ -1,7 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { CheckCircle2 } from 'lucide-react';
 import { getWeekLabel, getCurrentWeekMonday } from '@/lib/weekUtils';
-import { motion } from 'framer-motion';
 
 export default function WeekOverview({ tasks }) {
   const weekTasks = tasks.filter(t => !t.week_of || t.week_of === getCurrentWeekMonday());
@@ -37,18 +36,14 @@ export default function WeekOverview({ tasks }) {
         </div>
 
         {/* Segmented progress bar: chores (75%) + team lift (25%) */}
-        <div className="h-2.5 bg-muted rounded-full overflow-hidden mb-2 flex gap-0.5">
-          <motion.div
-            className="h-full bg-primary rounded-l-full"
-            initial={{ width: '0%' }}
-            animate={{ width: `${choreProgress * 75}%` }}
-            transition={{ duration: 0.8, ease: 'easeOut' }}
+        <div className="relative h-2.5 bg-muted rounded-full overflow-hidden mb-2">
+          <div
+            className="absolute left-0 top-0 h-full bg-primary transition-all duration-700"
+            style={{ width: `${choreProgress * 75}%` }}
           />
-          <motion.div
-            className="h-full bg-accent rounded-r-full"
-            initial={{ width: '0%' }}
-            animate={{ width: `${teamLiftProgress * 25}%` }}
-            transition={{ duration: 0.8, ease: 'easeOut', delay: 0.1 }}
+          <div
+            className="absolute top-0 h-full bg-accent transition-all duration-700"
+            style={{ left: `${choreProgress * 75}%`, width: `${teamLiftProgress * 25}%` }}
           />
         </div>
         <div className="flex justify-between text-xs text-muted-foreground mb-4">
