@@ -5,6 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Shuffle } from 'lucide-react';
 
 const OCCURRENCES = [
   { value: 'daily', label: 'Daily' },
@@ -14,16 +16,36 @@ const OCCURRENCES = [
   { value: 'as_needed', label: 'As needed' },
 ];
 
-const empty = { title: '', occurrence: 'weekly', assigned_to: '', priority: 'medium', notes: '' };
+const empty = { title: '', occurrence: 'weekly', priority: 'medium', notes: '' };
 
 export default function AddChoreDialog({ open, onOpenChange, onSubmit, members }) {
   const [form, setForm] = useState(empty);
+  const [selectedMembers, setSelectedMembers] = useState([]);
+  const [randomAssign, setRandomAssign] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!form.title.trim()) return;
-    onSubmit(form);
+    let assigned_to = '';
+    if (randomAssign || selectedMembers.length === 0) {
+      // pick random from selected pool, or all members if none checked
+      const pool = selectedMembers.length > 0 ? selectedMembers : members.map(m => m.name);
+      assigned_to = pool[Math.floor(Math.random() * pool.length)];
+    } else if (selectedMembers.length === 1) {
+      assigned_to = selectedMembers[0];
+    } else {
+      assigned_to = 'anyone';
+    }
+    onSubmit({ ...form, assigned_to });
     setForm(empty);
+    setSelectedMembers([]);
+    setRandomAssign(false);
+  };
+
+  const toggleMember = (name) => {
+    setSelectedMembers(prev =>
+      prev.includes(name) ? prev.filter(n => n !== name) : [...prev, name]
+    );
   };
 
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }));
@@ -73,15 +95,30 @@ export default function AddChoreDialog({ open, onOpenChange, onSubmit, members }
 
           <div>
             <Label>Assign To</Label>
-            <Select value={form.assigned_to} onValueChange={(v) => set('assigned_to', v)}>
-              <SelectTrigger className="mt-1"><SelectValue placeholder="Anyone" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="anyone">Anyone</SelectItem>
-                {members.map(m => (
-                  <SelectItem key={m.id} value={m.name}>{m.avatar_emoji} {m.display_name || m.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="mt-2 space-y-2 rounded-xl border bg-muted/30 p-3">
+              {members.map(m => (
+                <div key={m.id} className="flex items-center gap-2">
+                  <Checkbox
+                    id={`member-${m.id}`}
+                    checked={selectedMembers.includes(m.name)}
+                    onCheckedChange={() => toggleMember(m.name)}
+                  />
+                  <label htmlFor={`member-${m.id}`} className="text-sm cursor-pointer select-none">
+                    {m.avatar_emoji} {m.display_name || m.name}
+                  </label>
+                </div>
+              ))}
+              <div className="border-t pt-2 mt-1 flex items-center gap-2">
+                <Checkbox
+                  id="random-assign"
+                  checked={randomAssign}
+                  onCheckedChange={setRandomAssign}
+                />
+                <label htmlFor="random-assign" className="text-sm cursor-pointer select-none flex items-center gap-1.5">
+                  <Shuffle className="w-3.5 h-3.5 text-primary" /> Random (from checked, or all)
+                </label>
+              </div>
+            </div>
           </div>
 
           <div>
