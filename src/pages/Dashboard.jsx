@@ -4,6 +4,7 @@ import QuickActions from '@/components/dashboard/QuickActions';
 import WeekOverview from '@/components/dashboard/WeekOverview';
 import ChoreChart from '@/components/dashboard/ChoreChart';
 import AdminAlerts from '@/components/dashboard/AdminAlerts';
+import ChoreHistory from '@/components/dashboard/ChoreHistory';
 import { useLocalUser } from '@/lib/LocalUserContext';
 
 export default function Dashboard() {
@@ -22,6 +23,7 @@ export default function Dashboard() {
       <WeekOverview tasks={tasks} />
       {localUser?.role === 'admin' && <AdminAlerts />}
       <ChoreChart tasks={tasks} />
+      <ChoreHistory tasks={tasks} />
       <QuickActions />
     </div>
   );
