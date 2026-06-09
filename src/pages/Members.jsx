@@ -5,14 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { UserPlus, Trash2 } from 'lucide-react';
+import { UserPlus, Trash2, Shield, User } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { Navigate } from 'react-router-dom';
 
 export default function Members() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const [form, setForm] = useState({ name: '', display_name: '', avatar_emoji: '' });
+  const [form, setForm] = useState({ name: '', display_name: '', avatar_emoji: '', role: 'user' });
 
   const { data: members = [], isLoading } = useQuery({
     queryKey: ['members'],
@@ -23,7 +23,7 @@ export default function Members() {
     mutationFn: (data) => base44.entities.FamilyMember.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['members'] });
-      setForm({ name: '', display_name: '', avatar_emoji: '' });
+      setForm({ name: '', display_name: '', avatar_emoji: '', role: 'user' });
     },
   });
 
@@ -75,14 +75,35 @@ export default function Members() {
                 />
               </div>
             </div>
-            <div>
-              <Label>Emoji Avatar (optional)</Label>
-              <Input
-                value={form.avatar_emoji}
-                onChange={(e) => setForm({ ...form, avatar_emoji: e.target.value })}
-                placeholder="🧑"
-                className="mt-1 w-24"
-              />
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Emoji Avatar (optional)</Label>
+                <Input
+                  value={form.avatar_emoji}
+                  onChange={(e) => setForm({ ...form, avatar_emoji: e.target.value })}
+                  placeholder="🧑"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Role</Label>
+                <div className="flex gap-2 mt-1">
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, role: 'user' })}
+                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg border text-sm font-medium transition-all ${form.role === 'user' ? 'border-primary bg-primary/10 text-primary' : 'bg-card text-muted-foreground hover:bg-muted/50'}`}
+                  >
+                    <User className="w-3.5 h-3.5" /> User
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, role: 'admin' })}
+                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg border text-sm font-medium transition-all ${form.role === 'admin' ? 'border-primary bg-primary/10 text-primary' : 'bg-card text-muted-foreground hover:bg-muted/50'}`}
+                  >
+                    <Shield className="w-3.5 h-3.5" /> Admin
+                  </button>
+                </div>
+              </div>
             </div>
             <Button type="submit" className="w-full rounded-xl" disabled={addMember.isPending}>
               {addMember.isPending ? 'Adding…' : 'Add Member'}
@@ -102,7 +123,14 @@ export default function Members() {
               <div key={member.id} className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
                 <span className="text-2xl">{member.avatar_emoji || '👤'}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm">{member.name}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium text-sm">{member.name}</p>
+                    {member.role === 'admin' && (
+                      <span className="flex items-center gap-0.5 text-[10px] font-medium text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">
+                        <Shield className="w-2.5 h-2.5" /> Admin
+                      </span>
+                    )}
+                  </div>
                   {member.display_name && (
                     <p className="text-xs text-muted-foreground">"{member.display_name}"</p>
                   )}

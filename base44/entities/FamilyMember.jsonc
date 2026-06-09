@@ -14,6 +14,15 @@
       "type": "string",
       "description": "An emoji used as their avatar"
     },
+    "role": {
+      "type": "string",
+      "enum": [
+        "user",
+        "admin"
+      ],
+      "default": "user",
+      "description": "Role of the family member in the app"
+    },
     "availability": {
       "type": "string",
       "enum": [
