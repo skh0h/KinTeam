@@ -25,7 +25,7 @@ const DAYS = [
   { value: 'sunday', label: 'Sunday' },
 ];
 
-const empty = { title: '', occurrence: 'weekly', priority: 'medium', due_day: 'any', notes: '', assigned_to: '' };
+const empty = { title: '', occurrence: 'weekly', priority: 'medium', due_day: 'any', notes: '', assigned_to: '', permanent_assigned_to: '' };
 
 export default function AddChoreDialog({ open, onOpenChange, onSubmit, members }) {
   const [form, setForm] = useState(empty);
@@ -94,19 +94,35 @@ export default function AddChoreDialog({ open, onOpenChange, onSubmit, members }
             </Select>
           </div>
 
-          <div>
-            <Label>Assign To (optional)</Label>
-            <Select value={form.assigned_to} onValueChange={(v) => set('assigned_to', v)}>
-              <SelectTrigger className="mt-1"><SelectValue placeholder="Unassigned" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value={null}>Unassigned</SelectItem>
-                {(members || []).map(m => (
-                  <SelectItem key={m.id} value={m.id}>
-                    {m.avatar_emoji ? `${m.avatar_emoji} ` : ''}{m.display_name || m.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Assign this week</Label>
+              <Select value={form.assigned_to} onValueChange={(v) => set('assigned_to', v)}>
+                <SelectTrigger className="mt-1"><SelectValue placeholder="Unassigned" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={null}>Unassigned</SelectItem>
+                  {(members || []).map(m => (
+                    <SelectItem key={m.id} value={m.id}>
+                      {m.avatar_emoji ? `${m.avatar_emoji} ` : ''}{m.display_name || m.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Always assign to</Label>
+              <Select value={form.permanent_assigned_to} onValueChange={(v) => set('permanent_assigned_to', v)}>
+                <SelectTrigger className="mt-1"><SelectValue placeholder="Nobody" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={null}>Nobody</SelectItem>
+                  {(members || []).map(m => (
+                    <SelectItem key={m.id} value={m.id}>
+                      {m.avatar_emoji ? `${m.avatar_emoji} ` : ''}{m.display_name || m.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div>

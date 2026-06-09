@@ -39,7 +39,12 @@
       "type": "string"
     },
     "assigned_to": {
-      "type": "string"
+      "type": "string",
+      "description": "Weekly assignment (member ID)"
+    },
+    "permanent_assigned_to": {
+      "type": "string",
+      "description": "Permanent/all-time assignment (member ID) \u2014 overrides weekly rotation"
     },
     "due_day": {
       "type": "string",

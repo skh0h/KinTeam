@@ -70,7 +70,8 @@ export default function Zones() {
             isAdmin={isAdmin}
             members={members}
             onStatusChange={(id, status) => updateTask.mutate({ id, data: { status } })}
-            onAssign={(id, name) => updateTask.mutate({ id, data: { assigned_to: name } })}
+            onAssign={(id, memberId) => updateTask.mutate({ id, data: { assigned_to: memberId } })}
+            onPermanentAssign={(id, memberId) => updateTask.mutate({ id, data: { permanent_assigned_to: memberId } })}
             onDelete={(id) => deleteTask.mutate(id)}
           />
         ))}
