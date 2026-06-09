@@ -4,7 +4,7 @@ import { getWeekLabel, getCurrentWeekMonday } from '@/lib/weekUtils';
 import { motion } from 'framer-motion';
 
 export default function WeekOverview({ tasks }) {
-  const weekTasks = tasks.filter(t => t.week_of === getCurrentWeekMonday());
+  const weekTasks = tasks.filter(t => !t.week_of || t.week_of === getCurrentWeekMonday());
 
   // Chores = routine tasks (75% weight), Team Lift = phase sub-tasks (25% weight)
   const choreTasks = weekTasks.filter(t => t.task_type === 'routine' || (!t.task_type && !t.parent_task_id));

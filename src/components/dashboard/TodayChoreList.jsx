@@ -23,7 +23,7 @@ export default function TodayChoreList({ tasks, members, isAdmin }) {
     return tasks
       .filter(t =>
         t.task_type === 'routine' &&
-        t.week_of === weekOf &&
+        (!t.week_of || t.week_of === weekOf) &&
         (t.due_day === selectedDayName || t.due_day === 'any')
       )
       .sort((a, b) => {
