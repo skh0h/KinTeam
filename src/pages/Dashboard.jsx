@@ -1,6 +1,5 @@
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import QuickActions from '@/components/dashboard/QuickActions';
 import WeekOverview from '@/components/dashboard/WeekOverview';
 import AdminAlerts from '@/components/dashboard/AdminAlerts';
 import TodayChoreList from '@/components/dashboard/TodayChoreList';
@@ -27,7 +26,6 @@ export default function Dashboard() {
       <WeekOverview tasks={tasks} />
       <TodayChoreList tasks={tasks} members={members} isAdmin={localUser?.role === 'admin'} />
       {localUser?.role === 'admin' && <AdminAlerts />}
-      {localUser?.role === 'admin' && <QuickActions />}
     </div>
   );
 }
