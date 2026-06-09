@@ -6,13 +6,17 @@
       "type": "string",
       "description": "Task title"
     },
-    "zone_id": {
+    "occurrence": {
       "type": "string",
-      "description": "ID of the SystemZone this task belongs to"
-    },
-    "zone_name": {
-      "type": "string",
-      "description": "Denormalized zone name for display"
+      "enum": [
+        "daily",
+        "weekly",
+        "fortnightly",
+        "monthly",
+        "as_needed"
+      ],
+      "default": "weekly",
+      "description": "How often this chore recurs"
     },
     "task_type": {
       "type": "string",

@@ -1,6 +1,5 @@
 import { Card, CardContent } from '@/components/ui/card';
 import StatusBadge from '@/components/shared/StatusBadge';
-import PhaseBadge from '@/components/shared/PhaseBadge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { MoreVertical, CheckCircle2, Clock, Circle, Trash2 } from 'lucide-react';
@@ -19,8 +18,12 @@ export default function TaskCard({ task, onStatusChange, onDelete }) {
               </p>
               <div className="flex flex-wrap items-center gap-1.5 mt-2">
                 <StatusBadge status={task.status} />
-                <PhaseBadge phase={task.phase} />
-                {task.assigned_to && (
+                {task.occurrence && task.occurrence !== 'as_needed' && (
+                  <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full capitalize">
+                    {task.occurrence === 'fortnightly' ? 'Every 2 wks' : task.occurrence}
+                  </span>
+                )}
+                {task.assigned_to && task.assigned_to !== 'anyone' && (
                   <span className="text-xs text-muted-foreground">→ {task.assigned_to}</span>
                 )}
               </div>
