@@ -2,10 +2,12 @@ import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Home, Users, UserPlus, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/AuthContext';
+import { useLocalUser } from '@/lib/LocalUserContext';
 
 export default function AppShell() {
   const location = useLocation();
   const { user } = useAuth();
+  const { localUser } = useLocalUser();
 
   const navItems = [
     { path: '/', label: 'Dashboard', icon: Home },
@@ -23,6 +25,12 @@ export default function AppShell() {
             <span className="text-2xl">🏠</span>
             <h1 className="font-display text-lg font-semibold tracking-tight">All-Hands</h1>
           </Link>
+          {localUser && (
+            <Link to="/settings" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors md:hidden">
+              <span className="text-lg">{localUser.avatar_emoji || '👤'}</span>
+              <span className="font-medium">{localUser.display_name || localUser.name}</span>
+            </Link>
+          )}
           <nav className="hidden md:flex items-center gap-1">
             {navItems.map(item => {
               const Icon = item.icon;

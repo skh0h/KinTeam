@@ -1,13 +1,22 @@
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CheckCircle, LogOut, Settings as SettingsIcon, KeyRound } from 'lucide-react';
-import { useAuth } from '@/lib/AuthContext';
+import { Settings as SettingsIcon, LogOut } from 'lucide-react';
+import { useLocalUser } from '@/lib/LocalUserContext';
 import { base44 } from '@/api/base44Client';
-import Login from '@/pages/Login';
 
 export default function Settings() {
-  const { user } = useAuth();
+  const { localUser, signIn, signOut } = useLocalUser();
+  const [members, setMembers] = useState([]);
+
+  useEffect(() => {
+    base44.entities.FamilyMember.list().then(setMembers);
+  }, []);
+
+  const handleSwitch = (member) => {
+    signIn(member);
+  };
 
   return (
     <div className="space-y-6">
@@ -19,7 +28,7 @@ export default function Settings() {
       <Tabs defaultValue="account">
         <TabsList className="w-full">
           <TabsTrigger value="account" className="flex-1">Account</TabsTrigger>
-          <TabsTrigger value="auth" className="flex-1">Auth</TabsTrigger>
+          <TabsTrigger value="auth" className="flex-1">Switch User</TabsTrigger>
         </TabsList>
 
         {/* Account Tab */}
@@ -28,53 +37,63 @@ export default function Settings() {
             <CardHeader className="pb-3">
               <div className="flex items-center gap-2">
                 <SettingsIcon className="w-5 h-5 text-primary" />
-                <CardTitle className="font-display text-lg">Your Account</CardTitle>
+                <CardTitle className="font-display text-lg">You are</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
-              {user ? (
+              {localUser ? (
                 <div className="space-y-4">
-                  <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
-                    <CheckCircle className="w-5 h-5 text-emerald-500 shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm">{user.full_name || '—'}</p>
-                      <p className="text-xs text-muted-foreground">{user.email} · <span className="capitalize">{user.role}</span></p>
+                  <div className="flex items-center gap-3 p-4 rounded-xl bg-muted/50">
+                    <span className="text-4xl">{localUser.avatar_emoji || '👤'}</span>
+                    <div>
+                      <p className="font-semibold">{localUser.display_name || localUser.name}</p>
+                      {localUser.display_name && <p className="text-xs text-muted-foreground">{localUser.name}</p>}
                     </div>
                   </div>
                   <Button
                     variant="outline"
                     className="w-full gap-2 text-destructive border-destructive/30 hover:bg-destructive/5"
-                    onClick={() => base44.auth.logout()}
+                    onClick={signOut}
                   >
-                    <LogOut className="w-4 h-4" /> Log Out
+                    <LogOut className="w-4 h-4" /> Sign Out
                   </Button>
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground text-center py-4">Not logged in. Use the Auth tab to sign in.</p>
+                <p className="text-sm text-muted-foreground text-center py-4">No one selected. Use Switch User.</p>
               )}
             </CardContent>
           </Card>
         </TabsContent>
 
-        {/* Auth Tab — embedded login form */}
+        {/* Switch User Tab */}
         <TabsContent value="auth" className="mt-4">
-          {user ? (
-            <Card>
-              <CardContent className="pt-6 text-center space-y-3">
-                <KeyRound className="w-8 h-8 text-primary mx-auto" />
-                <p className="font-medium">You're already logged in as <span className="text-primary">{user.full_name || user.email}</span>.</p>
-                <Button
-                  variant="outline"
-                  className="gap-2 text-destructive border-destructive/30 hover:bg-destructive/5"
-                  onClick={() => base44.auth.logout()}
-                >
-                  <LogOut className="w-4 h-4" /> Log Out
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <Login />
-          )}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="font-display text-lg">Who are you?</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {members.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">No members set up yet.</p>
+              ) : (
+                <div className="grid grid-cols-2 gap-3">
+                  {members.map((member) => (
+                    <button
+                      key={member.id}
+                      onClick={() => handleSwitch(member)}
+                      className={`flex flex-col items-center gap-2 p-5 rounded-2xl border transition-all active:scale-95 ${
+                        localUser?.id === member.id
+                          ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
+                          : 'bg-card hover:bg-muted/50 hover:border-primary/40'
+                      }`}
+                    >
+                      <span className="text-4xl">{member.avatar_emoji || '👤'}</span>
+                      <span className="font-medium text-sm">{member.display_name || member.name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

@@ -13,6 +13,7 @@ import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
 import AppShell from '@/components/layout/AppShell';
+import { LocalUserProvider } from '@/lib/LocalUserContext';
 import Dashboard from '@/pages/Dashboard';
 import Zones from '@/pages/Zones';
 import TeamLift from '@/pages/TeamLift';
@@ -68,6 +69,7 @@ function App() {
 
   return (
     <AuthProvider>
+      <LocalUserProvider>
       <QueryClientProvider client={queryClientInstance}>
         <Router>
           <ScrollToTop />
@@ -75,6 +77,7 @@ function App() {
         </Router>
         <Toaster />
       </QueryClientProvider>
+      </LocalUserProvider>
     </AuthProvider>
   )
 }
