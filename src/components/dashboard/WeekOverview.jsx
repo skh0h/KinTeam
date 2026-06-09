@@ -1,5 +1,5 @@
 import { Card, CardContent } from '@/components/ui/card';
-import { CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import { getWeekLabel, getCurrentWeekMonday } from '@/lib/weekUtils';
 import { motion } from 'framer-motion';
 
@@ -18,14 +18,9 @@ export default function WeekOverview({ tasks }) {
 
   const progress = Math.round((choreProgress * 0.75 + teamLiftProgress * 0.25) * 100);
 
-  const done = weekTasks.filter(t => t.status === 'done').length;
-  const inProgress = weekTasks.filter(t => t.status === 'in_progress').length;
-  const pending = weekTasks.filter(t => t.status === 'pending').length;
-
   const stats = [
     { label: 'Chores Done', value: `${choresDone}/${choreTasks.length}`, icon: CheckCircle2, color: 'text-primary' },
     { label: 'Team Lift Done', value: `${teamLiftDone}/${teamLiftTasks.length}`, icon: CheckCircle2, color: 'text-accent' },
-    { label: 'Pending', value: pending, icon: AlertCircle, color: 'text-muted-foreground' },
   ];
 
   return (
@@ -64,7 +59,7 @@ export default function WeekOverview({ tasks }) {
           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-accent inline-block" />Team Lift 25%</span>
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-3">
           {stats.map(stat => {
             const Icon = stat.icon;
             return (
