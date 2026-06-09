@@ -113,7 +113,7 @@ export default function ChoreHistory({ tasks, isAdmin }) {
                       entry.total === 0 ? 'transparent' :
                       entry.pct === 100 ? 'hsl(var(--accent))' :
                       isToday ? 'hsl(var(--primary))' :
-                      'hsl(var(--chart-2))'
+                      'hsl(var(--chart-4))'
                     }
                     opacity={entry.hidden ? 0.3 : 1}
                   />
@@ -124,7 +124,7 @@ export default function ChoreHistory({ tasks, isAdmin }) {
         </ResponsiveContainer>
         <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-accent inline-block" /> All done</span>
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-[hsl(var(--chart-2))] inline-block" /> Partial</span>
+          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-[hsl(var(--chart-4))] inline-block" /> Pending</span>
           <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-muted inline-block" /> None</span>
         </div>
       </CardContent>
