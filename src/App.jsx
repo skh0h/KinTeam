@@ -47,12 +47,14 @@ const AuthenticatedApp = () => {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
-      <Route element={<AppShell />}>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/zones" element={<Zones />} />
-        <Route path="/team-lift" element={<TeamLift />} />
-        <Route path="/members" element={<Members />} />
-        <Route path="/settings" element={<Settings />} />
+      <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
+        <Route element={<AppShell />}>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/zones" element={<Zones />} />
+          <Route path="/team-lift" element={<TeamLift />} />
+          <Route path="/members" element={<Members />} />
+          <Route path="/settings" element={<Settings />} />
+        </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

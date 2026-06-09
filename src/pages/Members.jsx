@@ -32,11 +32,6 @@ export default function Members() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['members'] }),
   });
 
-  // Redirect non-admins (after all hooks)
-  if (user && user.role !== 'admin') {
-    return <Navigate to="/" replace />;
-  }
-
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!form.name.trim()) return;
