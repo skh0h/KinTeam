@@ -23,7 +23,7 @@ export default function Dashboard() {
       <WeekOverview tasks={tasks} />
       {localUser?.role === 'admin' && <AdminAlerts />}
       <ChoreChart tasks={tasks} />
-      <ChoreHistory tasks={tasks} />
+      <ChoreHistory tasks={tasks} isAdmin={localUser?.role === 'admin'} />
       <QuickActions />
     </div>
   );

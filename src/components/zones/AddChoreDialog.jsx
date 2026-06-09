@@ -15,7 +15,18 @@ const OCCURRENCES = [
   { value: 'as_needed', label: 'As needed' },
 ];
 
-const empty = { title: '', occurrence: 'weekly', priority: 'medium', notes: '' };
+const DAYS = [
+  { value: 'any', label: 'Any day' },
+  { value: 'monday', label: 'Monday' },
+  { value: 'tuesday', label: 'Tuesday' },
+  { value: 'wednesday', label: 'Wednesday' },
+  { value: 'thursday', label: 'Thursday' },
+  { value: 'friday', label: 'Friday' },
+  { value: 'saturday', label: 'Saturday' },
+  { value: 'sunday', label: 'Sunday' },
+];
+
+const empty = { title: '', occurrence: 'weekly', priority: 'medium', due_day: 'any', notes: '' };
 
 export default function AddChoreDialog({ open, onOpenChange, onSubmit, members }) {
   const [form, setForm] = useState(empty);
@@ -87,6 +98,18 @@ export default function AddChoreDialog({ open, onOpenChange, onSubmit, members }
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <div>
+            <Label>Day</Label>
+            <Select value={form.due_day} onValueChange={(v) => set('due_day', v)}>
+              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {DAYS.map(d => (
+                  <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div>

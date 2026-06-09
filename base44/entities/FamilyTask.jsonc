@@ -41,6 +41,21 @@
     "assigned_to": {
       "type": "string"
     },
+    "due_day": {
+      "type": "string",
+      "enum": [
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday",
+        "sunday",
+        "any"
+      ],
+      "default": "any",
+      "description": "Day of the week the chore should be done"
+    },
     "status": {
       "type": "string",
       "enum": [
