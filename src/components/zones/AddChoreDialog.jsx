@@ -6,7 +6,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Shuffle } from 'lucide-react';
 
 const OCCURRENCES = [
   { value: 'daily', label: 'Daily' },
@@ -21,25 +20,22 @@ const empty = { title: '', occurrence: 'weekly', priority: 'medium', notes: '' }
 export default function AddChoreDialog({ open, onOpenChange, onSubmit, members }) {
   const [form, setForm] = useState(empty);
   const [selectedMembers, setSelectedMembers] = useState([]);
-  const [randomAssign, setRandomAssign] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!form.title.trim()) return;
     let assigned_to = '';
-    if (randomAssign || selectedMembers.length === 0) {
-      // pick random from selected pool, or all members if none checked
-      const pool = selectedMembers.length > 0 ? selectedMembers : members.map(m => m.name);
-      assigned_to = pool[Math.floor(Math.random() * pool.length)];
+    if (selectedMembers.length === 0) {
+      assigned_to = 'anyone';
     } else if (selectedMembers.length === 1) {
       assigned_to = selectedMembers[0];
     } else {
-      assigned_to = 'anyone';
+      // 2+ checked = random pick from the pool
+      assigned_to = selectedMembers[Math.floor(Math.random() * selectedMembers.length)];
     }
     onSubmit({ ...form, assigned_to });
     setForm(empty);
     setSelectedMembers([]);
-    setRandomAssign(false);
   };
 
   const toggleMember = (name) => {
@@ -108,16 +104,11 @@ export default function AddChoreDialog({ open, onOpenChange, onSubmit, members }
                   </label>
                 </div>
               ))}
-              <div className="border-t pt-2 mt-1 flex items-center gap-2">
-                <Checkbox
-                  id="random-assign"
-                  checked={randomAssign}
-                  onCheckedChange={setRandomAssign}
-                />
-                <label htmlFor="random-assign" className="text-sm cursor-pointer select-none flex items-center gap-1.5">
-                  <Shuffle className="w-3.5 h-3.5 text-primary" /> Random (from checked, or all)
-                </label>
-              </div>
+              {selectedMembers.length >= 2 && (
+                <p className="text-xs text-muted-foreground border-t pt-2 mt-1">
+                  🎲 Will be randomly assigned to one of the checked members.
+                </p>
+              )}
             </div>
           </div>
 
