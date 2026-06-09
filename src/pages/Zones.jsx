@@ -67,7 +67,10 @@ export default function Zones() {
           <TaskCard
             key={task.id}
             task={task}
+            isAdmin={isAdmin}
+            members={members}
             onStatusChange={(id, status) => updateTask.mutate({ id, data: { status } })}
+            onAssign={(id, name) => updateTask.mutate({ id, data: { assigned_to: name } })}
             onDelete={(id) => deleteTask.mutate(id)}
           />
         ))}

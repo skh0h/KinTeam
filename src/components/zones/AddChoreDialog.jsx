@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
 
 const OCCURRENCES = [
   { value: 'daily', label: 'Daily' },
@@ -30,29 +29,12 @@ const empty = { title: '', occurrence: 'weekly', priority: 'medium', due_day: 'a
 
 export default function AddChoreDialog({ open, onOpenChange, onSubmit, members }) {
   const [form, setForm] = useState(empty);
-  const [selectedMembers, setSelectedMembers] = useState([]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!form.title.trim()) return;
-    let assigned_to = '';
-    if (selectedMembers.length === 0) {
-      assigned_to = 'anyone';
-    } else if (selectedMembers.length === 1) {
-      assigned_to = selectedMembers[0];
-    } else {
-      // 2+ checked = random pick from the pool
-      assigned_to = selectedMembers[Math.floor(Math.random() * selectedMembers.length)];
-    }
-    onSubmit({ ...form, assigned_to });
+    onSubmit({ ...form, assigned_to: '' });
     setForm(empty);
-    setSelectedMembers([]);
-  };
-
-  const toggleMember = (name) => {
-    setSelectedMembers(prev =>
-      prev.includes(name) ? prev.filter(n => n !== name) : [...prev, name]
-    );
   };
 
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }));
@@ -110,29 +92,6 @@ export default function AddChoreDialog({ open, onOpenChange, onSubmit, members }
                 ))}
               </SelectContent>
             </Select>
-          </div>
-
-          <div>
-            <Label>Assign To</Label>
-            <div className="mt-2 space-y-2 rounded-xl border bg-muted/30 p-3">
-              {members.map(m => (
-                <div key={m.id} className="flex items-center gap-2">
-                  <Checkbox
-                    id={`member-${m.id}`}
-                    checked={selectedMembers.includes(m.name)}
-                    onCheckedChange={() => toggleMember(m.name)}
-                  />
-                  <label htmlFor={`member-${m.id}`} className="text-sm cursor-pointer select-none">
-                    {m.avatar_emoji} {m.display_name || m.name}
-                  </label>
-                </div>
-              ))}
-              {selectedMembers.length >= 2 && (
-                <p className="text-xs text-muted-foreground border-t pt-2 mt-1">
-                  🎲 Will be randomly assigned to one of the checked members.
-                </p>
-              )}
-            </div>
           </div>
 
           <div>
