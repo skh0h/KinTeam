@@ -1,0 +1,27 @@
+{
+  "name": "AdminAlert",
+  "type": "object",
+  "properties": {
+    "message": {
+      "type": "string",
+      "description": "The alert message"
+    },
+    "from_member": {
+      "type": "string",
+      "description": "Display name of the member who sent it"
+    },
+    "task_title": {
+      "type": "string",
+      "description": "Title of the chore marked complete"
+    },
+    "read": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether an admin has read/dismissed this alert"
+    }
+  },
+  "required": [
+    "message",
+    "from_member"
+  ]
+}
