@@ -13,7 +13,7 @@ const phaseIcons = { prep: ClipboardList, execution: Zap, verification: CheckSqu
 const phaseLabels = { prep: 'Prep', execution: 'Execution', verification: 'Verification' };
 const phaseOrder = ['prep', 'execution', 'verification'];
 
-export default function TeamLiftProject({ projectName, phases, onStatusChange, onDelete }) {
+export default function TeamLiftProject({ projectName, projectId, phases, onStatusChange, onDelete, onDeleteProject }) {
   const [expanded, setExpanded] = useState(false);
   const queryClient = useQueryClient();
   const total = phases.length;
@@ -35,12 +35,26 @@ export default function TeamLiftProject({ projectName, phases, onStatusChange, o
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
       <Card>
-        <CardHeader className="pb-2 cursor-pointer select-none" onClick={() => setExpanded(e => !e)}>
+        <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
-            <h3 className="font-display text-lg font-semibold">{projectName}</h3>
+            <div className="flex items-center gap-2 flex-1 cursor-pointer select-none" onClick={() => setExpanded(e => !e)}>
+              <h3 className="font-display text-lg font-semibold">{projectName}</h3>
+              <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} />
+            </div>
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-primary">{progress}%</span>
-              <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0">
+                    <MoreVertical className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => onDeleteProject && onDeleteProject(projectId)} className="text-destructive">
+                    <Trash2 className="w-4 h-4 mr-2" /> Delete Project
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
           <Progress value={progress} className="h-1.5 mt-2" />

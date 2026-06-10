@@ -98,10 +98,18 @@ export default function TeamLift() {
         {projects.map(project => (
           <TeamLiftProject
             key={project.id}
+            projectId={project.id}
             projectName={project.title}
             phases={project.phases}
             onStatusChange={(id, status) => updateTask.mutate({ id, data: { status } })}
             onDelete={(id) => deleteTask.mutate(id)}
+            onDeleteProject={async (id) => {
+              // Delete all phases first, then the parent
+              for (const phase of project.phases) {
+                await base44.entities.FamilyTask.delete(phase.id);
+              }
+              await deleteTask.mutateAsync(id);
+            }}
           />
         ))}
         {projects.length === 0 && (
