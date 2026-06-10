@@ -4,8 +4,10 @@ import { Progress } from '@/components/ui/progress';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
-import { ClipboardList, Zap, CheckSquare, Trash2, ChevronDown } from 'lucide-react';
+import { ClipboardList, Zap, CheckSquare, Trash2, ChevronDown, MoreVertical, Circle, Clock, CheckCircle2 } from 'lucide-react';
 import StatusBadge from '@/components/shared/StatusBadge';
+import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 const phaseIcons = { prep: ClipboardList, execution: Zap, verification: CheckSquare };
 const phaseLabels = { prep: 'Prep', execution: 'Execution', verification: 'Verification' };
@@ -65,18 +67,28 @@ export default function TeamLiftProject({ projectName, phases, onStatusChange, o
                   </div>
                   <div className="flex items-center gap-2">
                     <StatusBadge status={task.status} />
-                    <button
-                      onClick={() => {
-                        const next = task.status === 'pending' ? 'in_progress' : task.status === 'in_progress' ? 'done' : 'pending';
-                        onStatusChange(task.id, next);
-                      }}
-                      className="text-xs text-primary hover:underline"
-                    >
-                      {task.status === 'pending' ? 'Start' : task.status === 'in_progress' ? 'Done' : 'Reopen'}
-                    </button>
-                    <button onClick={() => onDelete(task.id)} className="text-muted-foreground hover:text-destructive transition-colors">
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0">
+                          <MoreVertical className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => onStatusChange(task.id, 'pending')}>
+                          <Circle className="w-4 h-4 mr-2 text-muted-foreground" /> Pending
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onStatusChange(task.id, 'in_progress')}>
+                          <Clock className="w-4 h-4 mr-2 text-primary" /> In Progress
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onStatusChange(task.id, 'done')}>
+                          <CheckCircle2 className="w-4 h-4 mr-2 text-emerald-600" /> Done
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => onDelete(task.id)} className="text-destructive">
+                          <Trash2 className="w-4 h-4 mr-2" /> Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
 
