@@ -1,9 +1,10 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
-import { ClipboardList, Zap, CheckSquare, Trash2 } from 'lucide-react';
+import { ClipboardList, Zap, CheckSquare, Trash2, ChevronDown } from 'lucide-react';
 import StatusBadge from '@/components/shared/StatusBadge';
 
 const phaseIcons = { prep: ClipboardList, execution: Zap, verification: CheckSquare };
@@ -11,6 +12,7 @@ const phaseLabels = { prep: 'Prep', execution: 'Execution', verification: 'Verif
 const phaseOrder = ['prep', 'execution', 'verification'];
 
 export default function TeamLiftProject({ projectName, phases, onStatusChange, onDelete }) {
+  const [expanded, setExpanded] = useState(false);
   const queryClient = useQueryClient();
   const total = phases.length;
   const done = phases.filter(t => t.status === 'done').length;
@@ -31,14 +33,21 @@ export default function TeamLiftProject({ projectName, phases, onStatusChange, o
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
       <Card>
-        <CardHeader className="pb-2">
+        <CardHeader className="pb-2 cursor-pointer select-none" onClick={() => setExpanded(e => !e)}>
           <div className="flex items-center justify-between">
             <h3 className="font-display text-lg font-semibold">{projectName}</h3>
-            <span className="text-sm font-medium text-primary">{progress}%</span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-primary">{progress}%</span>
+              <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} />
+            </div>
           </div>
           <Progress value={progress} className="h-1.5 mt-2" />
+          <p className="text-xs text-muted-foreground mt-1">{done}/{total} phases complete</p>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <AnimatePresence>
+        {expanded && (
+        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
+        <CardContent className="space-y-3 pt-0">
           {sortedPhases.map(task => {
             const Icon = phaseIcons[task.phase] || ClipboardList;
             const steps = task.steps || [];
@@ -113,6 +122,9 @@ export default function TeamLiftProject({ projectName, phases, onStatusChange, o
             );
           })}
         </CardContent>
+        </motion.div>
+        )}
+        </AnimatePresence>
       </Card>
     </motion.div>
   );
