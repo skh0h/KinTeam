@@ -50,6 +50,16 @@ export default function TeamLiftProject({ projectName, projectId, phases, onStat
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => onStatusChange(projectId, 'pending')}>
+                    <Circle className="w-4 h-4 mr-2 text-muted-foreground" /> Pending
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onStatusChange(projectId, 'in_progress')}>
+                    <Clock className="w-4 h-4 mr-2 text-primary" /> In Progress
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onStatusChange(projectId, 'done')}>
+                    <CheckCircle2 className="w-4 h-4 mr-2 text-emerald-600" /> Done
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => onDeleteProject && onDeleteProject(projectId)} className="text-destructive">
                     <Trash2 className="w-4 h-4 mr-2" /> Delete Project
                   </DropdownMenuItem>
