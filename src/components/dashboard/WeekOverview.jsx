@@ -12,8 +12,7 @@ export default function WeekOverview({ tasks }) {
   const choresDone = choreTasks.filter(t => t.status === 'done').length;
   const teamLiftDone = teamLiftTasks.filter(t => t.status === 'done').length;
 
-  const teamLiftParents = weekTasks.filter(t => t.task_type === 'team_lift' && !t.parent_task_id);
-  const hasTeamLift = teamLiftParents.length > 0 || teamLiftTasks.length > 0;
+  const hasTeamLift = teamLiftTasks.length > 0;
 
   const choreProgress = choreTasks.length > 0 ? choresDone / choreTasks.length : 0;
   const teamLiftProgress = teamLiftTasks.length > 0 ? teamLiftDone / teamLiftTasks.length : 0;
