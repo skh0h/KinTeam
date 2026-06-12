@@ -4,7 +4,7 @@ import { Progress } from '@/components/ui/progress';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
-import { ClipboardList, Zap, CheckSquare, Trash2, ChevronDown, MoreVertical, Circle, Clock, CheckCircle2 } from 'lucide-react';
+import { ClipboardList, Zap, CheckSquare, Trash2, ChevronDown, MoreVertical, Circle, Clock, CheckCircle2, Lock } from 'lucide-react';
 import StatusBadge from '@/components/shared/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -94,6 +94,7 @@ export default function TeamLiftProject({ projectName, projectId, phases, onStat
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
+                    {!canEdit && <Lock className="w-3.5 h-3.5 text-muted-foreground" />}
                     <StatusBadge status={task.status} />
                     {canEdit && <DropdownMenu>
                       <DropdownMenuTrigger asChild>
