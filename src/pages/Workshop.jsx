@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Pencil, Star, Repeat, CalendarDays, Users, ImagePlus, StickyNote, ArrowLeft, Hammer, X, Loader2 } from 'lucide-react';
 import WorkshopTile from '@/components/workshop/WorkshopTile';
 import ChorePreviewCard from '@/components/workshop/ChorePreviewCard';
+import AiChoreBuilder from '@/components/workshop/AiChoreBuilder';
 
 const OCCURRENCES = [
   { value: 'daily', label: 'Daily' },
@@ -69,6 +70,9 @@ export default function Workshop() {
           <p className="text-muted-foreground mt-1">Build your chore card tile by tile.</p>
         </div>
       </div>
+
+      {/* AI builder */}
+      <AiChoreBuilder onBuilt={(aiData) => setForm(f => ({ ...f, ...aiData }))} />
 
       {/* Live preview */}
       <ChorePreviewCard form={form} members={members} />
