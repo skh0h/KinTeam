@@ -18,6 +18,10 @@
       "type": "string",
       "description": "ID of the FamilyTask this alert is about"
     },
+    "step_id": {
+      "type": "string",
+      "description": "If set, this alert is about a Team Lift step within the task"
+    },
     "status": {
       "type": "string",
       "enum": [

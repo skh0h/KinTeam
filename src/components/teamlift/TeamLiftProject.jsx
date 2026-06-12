@@ -43,6 +43,24 @@ export default function TeamLiftProject({ projectName, projectId, phases, member
     queryClient.invalidateQueries({ queryKey: ['tasks'] });
   };
 
+  const submitStep = async (task, step) => {
+    const steps = (task.steps || []).map(s =>
+      s.id === step.id ? { ...s, pending_review: true } : s
+    );
+    await base44.entities.FamilyTask.update(task.id, { steps });
+    const myName = localUser?.display_name || localUser?.name;
+    await base44.entities.AdminAlert.create({
+      task_id: task.id,
+      step_id: step.id,
+      task_title: `${projectName}: ${step.text}`,
+      from_member: myName,
+      message: `${myName} completed step "${step.text}" in ${projectName}`,
+      status: 'pending',
+    });
+    queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    queryClient.invalidateQueries({ queryKey: ['admin-alerts'] });
+  };
+
   const reassignPhase = async (task, name) => {
     await base44.entities.FamilyTask.update(task.id, { assigned_to: name });
     queryClient.invalidateQueries({ queryKey: ['tasks'] });
@@ -183,20 +201,29 @@ export default function TeamLiftProject({ projectName, projectId, phases, member
                     <p className="text-xs text-muted-foreground">
                       Steps: {stepsDone}/{steps.length}
                     </p>
-                    {steps.map(step => (
+                    {steps.map(step => {
+                      const pending = !step.done && step.pending_review;
+                      const clickable = canEditStep(step) && (isAdmin || !pending);
+                      return (
                       <div key={step.id} className="flex items-center gap-2">
                         <button
-                          onClick={() => canEditStep(step) && toggleStep(task, step.id)}
-                          disabled={!canEditStep(step)}
-                          className={`flex items-center gap-2 flex-1 text-left group ${!canEditStep(step) ? 'cursor-not-allowed opacity-60' : ''}`}
+                          onClick={() => {
+                            if (!clickable) return;
+                            if (isAdmin) toggleStep(task, step.id);
+                            else submitStep(task, step);
+                          }}
+                          disabled={!clickable}
+                          className={`flex items-center gap-2 flex-1 text-left group ${!clickable ? 'cursor-not-allowed opacity-60' : ''}`}
                         >
                           <span className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${
-                            step.done ? 'bg-accent border-accent' : 'border-border group-hover:border-primary'
+                            step.done ? 'bg-accent border-accent' : pending ? 'bg-yellow-100 border-yellow-400' : 'border-border group-hover:border-primary'
                           }`}>
                             {step.done && <span className="text-white text-[10px]">✓</span>}
+                            {pending && <Clock className="w-2.5 h-2.5 text-yellow-600" />}
                           </span>
                           <span className={`text-xs flex-1 ${step.done ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
                             {step.text}
+                            {pending && <span className="ml-1.5 text-[10px] text-yellow-600">waiting on admin</span>}
                           </span>
                         </button>
                         {isAdmin ? (
@@ -226,7 +253,8 @@ export default function TeamLiftProject({ projectName, projectId, phases, member
                           )
                         )}
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>

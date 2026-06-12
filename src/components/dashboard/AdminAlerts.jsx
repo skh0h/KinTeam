@@ -17,7 +17,24 @@ export default function AdminAlerts() {
   const approve = useMutation({
     mutationFn: async (alert) => {
       const [task] = await base44.entities.FamilyTask.filter({ id: alert.task_id });
-      await base44.entities.FamilyTask.update(alert.task_id, completionUpdate(task, todayStr(), true));
+      if (alert.step_id) {
+        // Team Lift step approval
+        const steps = (task.steps || []).map(s =>
+          s.id === alert.step_id ? { ...s, done: true, pending_review: false } : s
+        );
+        const allDone = steps.length > 0 && steps.every(s => s.done);
+        const status = allDone ? 'done' : 'in_progress';
+        await base44.entities.FamilyTask.update(task.id, { steps, status });
+        if (task.parent_task_id) {
+          const phases = await base44.entities.FamilyTask.filter({ parent_task_id: task.parent_task_id });
+          const updated = phases.map(p => p.id === task.id ? { ...p, status } : p);
+          const parentStatus = updated.every(p => p.status === 'done') ? 'done'
+            : updated.some(p => p.status !== 'pending') ? 'in_progress' : 'pending';
+          await base44.entities.FamilyTask.update(task.parent_task_id, { status: parentStatus });
+        }
+      } else {
+        await base44.entities.FamilyTask.update(alert.task_id, completionUpdate(task, todayStr(), true));
+      }
       await base44.entities.AdminAlert.update(alert.id, { status: 'approved' });
     },
     onSuccess: () => {
@@ -29,10 +46,18 @@ export default function AdminAlerts() {
   const reject = useMutation({
     mutationFn: async (alert) => {
       const [task] = await base44.entities.FamilyTask.filter({ id: alert.task_id });
-      await base44.entities.FamilyTask.update(alert.task_id, {
-        ...completionUpdate(task, todayStr(), false),
-        stars_penalty: (task?.stars_penalty ?? 0) + 1,
-      });
+      if (alert.step_id) {
+        // Team Lift step rejection — uncheck the pending step
+        const steps = (task.steps || []).map(s =>
+          s.id === alert.step_id ? { ...s, pending_review: false } : s
+        );
+        await base44.entities.FamilyTask.update(task.id, { steps });
+      } else {
+        await base44.entities.FamilyTask.update(alert.task_id, {
+          ...completionUpdate(task, todayStr(), false),
+          stars_penalty: (task?.stars_penalty ?? 0) + 1,
+        });
+      }
       await base44.entities.AdminAlert.update(alert.id, { status: 'rejected', user_notified: false });
     },
     onSuccess: () => {

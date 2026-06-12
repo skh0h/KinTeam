@@ -133,6 +133,11 @@
           "done": {
             "type": "boolean",
             "default": false
+          },
+          "pending_review": {
+            "type": "boolean",
+            "default": false,
+            "description": "Step submitted by a user, awaiting admin approval"
           }
         }
       }
