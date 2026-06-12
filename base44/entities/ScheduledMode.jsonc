@@ -1,0 +1,28 @@
+{
+  "name": "ScheduledMode",
+  "type": "object",
+  "properties": {
+    "start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "normal",
+        "workhorse",
+        "vacation"
+      ],
+      "default": "vacation"
+    }
+  },
+  "required": [
+    "start_date",
+    "end_date",
+    "mode"
+  ]
+}

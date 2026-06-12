@@ -15,9 +15,9 @@ export function useHouseholdMode() {
   const mutation = useMutation({
     mutationFn: async (newMode) => {
       if (record) {
-        await base44.entities.HouseholdSettings.update(record.id, { mode: newMode });
+        await base44.entities.HouseholdSettings.update(record.id, { mode: newMode, auto_set: false });
       } else {
-        await base44.entities.HouseholdSettings.create({ mode: newMode });
+        await base44.entities.HouseholdSettings.create({ mode: newMode, auto_set: false });
       }
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['household-settings'] }),

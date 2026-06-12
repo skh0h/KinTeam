@@ -8,6 +8,9 @@ import { useLocalUser } from '@/lib/LocalUserContext';
 import { completionUpdate } from '@/lib/choreCompletion';
 import { useHouseholdMode } from '@/hooks/useHouseholdMode';
 import ModeSelector from '@/components/dashboard/ModeSelector';
+import ModeScheduler from '@/components/dashboard/ModeScheduler';
+import WeeklyRecapCard from '@/components/dashboard/WeeklyRecapCard';
+import TradeRequests from '@/components/trades/TradeRequests';
 
 export default function Dashboard() {
   const { localUser } = useLocalUser();
@@ -36,10 +39,13 @@ export default function Dashboard() {
         <h1 className="font-display text-3xl font-bold tracking-tight">Welcome Home</h1>
       </div>
       {localUser?.role === 'admin' && <ModeSelector mode={mode} setMode={setMode} isSaving={isSaving} />}
+      <TradeRequests />
       <WeekOverview tasks={tasks} mode={mode} />
       <MyChores tasks={tasks} mode={mode} />
       <TodayChoreList tasks={tasks} members={members} isAdmin={localUser?.role === 'admin'} currentMemberId={localUser?.id} mode={mode} onToggle={(task, dateStr, done) => toggleChore.mutate({ task, dateStr, done })} />
       {localUser?.role === 'admin' && <AdminAlerts />}
+      <WeeklyRecapCard />
+      {localUser?.role === 'admin' && <ModeScheduler />}
     </div>
   );
 }

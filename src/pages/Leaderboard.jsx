@@ -5,8 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Trophy } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { getStarWorth } from '@/lib/stars';
-import { isDaily } from '@/lib/choreCompletion';
+import { computeEarnedStars } from '@/lib/starEarnings';
 
 const rankEmojis = ['🥇', '🥈', '🥉'];
 
@@ -22,23 +21,9 @@ export default function Leaderboard() {
   });
 
   const entries = useMemo(() => {
-    const totals = {};
-    tasks
-      .filter(t => t.task_type === 'routine' && !t.archived)
-      .forEach(t => {
-        const memberId = t.permanent_assigned_to || t.assigned_to;
-        if (!memberId) return;
-        if (isDaily(t)) {
-          // Daily chores earn stars for each completed day
-          const days = (t.completed_dates || []).length;
-          if (days > 0) totals[memberId] = (totals[memberId] || 0) + getStarWorth(t) * days;
-        } else if (t.status === 'done') {
-          totals[memberId] = (totals[memberId] || 0) + getStarWorth(t);
-        }
-      });
-
+    const totals = computeEarnedStars(tasks);
     return members
-      .map(m => ({ member: m, stars: totals[m.id] || 0 }))
+      .map(m => ({ member: m, stars: (totals[m.id] || 0) + (m.bonus_stars || 0) }))
       .sort((a, b) => b.stars - a.stars);
   }, [tasks, members]);
 
@@ -75,6 +60,9 @@ export default function Leaderboard() {
                   <span className="text-2xl w-8 text-center">{rankEmojis[i] || `${i + 1}.`}</span>
                   <span className="text-xl">{entry.member.avatar_emoji || '👤'}</span>
                   <span className="flex-1 font-medium">{entry.member.display_name || entry.member.name}</span>
+                  {(entry.member.streak_count || 0) > 0 && (
+                    <span className="text-sm font-semibold text-orange-500">🔥 {entry.member.streak_count}</span>
+                  )}
                   <span className="font-display font-bold text-amber-600">⭐ {entry.stars}</span>
                 </motion.div>
               ))}

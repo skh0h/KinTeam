@@ -11,6 +11,11 @@
       ],
       "default": "normal",
       "description": "Current household mode"
+    },
+    "auto_set": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the current mode was set by the scheduler"
     }
   }
 }

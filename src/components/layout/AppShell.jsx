@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Home, Users, UserPlus, Settings, ClipboardList, Trophy } from 'lucide-react';
+import { Home, Users, UserPlus, Settings, ClipboardList, Trophy, Gift } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/AuthContext';
 import { useLocalUser } from '@/lib/LocalUserContext';
@@ -14,6 +14,7 @@ export default function AppShell() {
     { path: '/zones', label: 'Chores', icon: ClipboardList },
     { path: '/team-lift', label: 'Team Lift', icon: Users },
     { path: '/leaderboard', label: 'Leaders', icon: Trophy },
+    { path: '/rewards', label: 'Rewards', icon: Gift },
     ...(user?.role === 'admin' ? [{ path: '/members', label: 'Members', icon: UserPlus }] : []),
     { path: '/settings', label: 'Settings', icon: Settings },
   ];

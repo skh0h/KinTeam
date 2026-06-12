@@ -1,0 +1,26 @@
+{
+  "name": "StarReward",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Reward name (e.g. '30 min screen time')"
+    },
+    "emoji": {
+      "type": "string",
+      "description": "Emoji for the reward"
+    },
+    "cost": {
+      "type": "number",
+      "default": 5,
+      "description": "Star cost to redeem"
+    },
+    "description": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title",
+    "cost"
+  ]
+}

@@ -36,6 +36,20 @@
     "availability_note": {
       "type": "string",
       "description": "Optional note about availability"
+    },
+    "streak_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Consecutive days completing all assigned chores"
+    },
+    "bonus_stars": {
+      "type": "number",
+      "default": 0,
+      "description": "Bonus stars earned from streaks"
+    },
+    "last_streak_date": {
+      "type": "string",
+      "description": "Last date (yyyy-MM-dd) the streak was credited"
     }
   },
   "required": [

@@ -1,0 +1,38 @@
+{
+  "name": "RewardRedemption",
+  "type": "object",
+  "properties": {
+    "reward_id": {
+      "type": "string"
+    },
+    "reward_title": {
+      "type": "string"
+    },
+    "reward_emoji": {
+      "type": "string"
+    },
+    "cost": {
+      "type": "number"
+    },
+    "member_id": {
+      "type": "string"
+    },
+    "member_name": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "default": "pending"
+    }
+  },
+  "required": [
+    "reward_id",
+    "member_id",
+    "cost"
+  ]
+}

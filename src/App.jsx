@@ -19,6 +19,7 @@ import Zones from '@/pages/Zones';
 import TeamLift from '@/pages/TeamLift';
 import Members from '@/pages/Members';
 import Leaderboard from '@/pages/Leaderboard';
+import Rewards from '@/pages/Rewards';
 import Workshop from '@/pages/Workshop';
 import Settings from '@/pages/Settings';
 
@@ -56,6 +57,7 @@ const AuthenticatedApp = () => {
           <Route path="/workshop" element={<Workshop />} />
           <Route path="/team-lift" element={<TeamLift />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
+          <Route path="/rewards" element={<Rewards />} />
           <Route path="/members" element={<Members />} />
           <Route path="/settings" element={<Settings />} />
         </Route>

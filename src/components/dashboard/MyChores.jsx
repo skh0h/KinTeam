@@ -1,10 +1,11 @@
-import { useMemo, useEffect, useRef } from 'react';
+import { useMemo, useEffect, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import confetti from 'canvas-confetti';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Circle, Clock, XCircle, CheckCircle2, Send } from 'lucide-react';
+import { Circle, Clock, XCircle, CheckCircle2, Send, ArrowLeftRight } from 'lucide-react';
+import TradeDialog from '@/components/trades/TradeDialog';
 import { useLocalUser } from '@/lib/LocalUserContext';
 import { getStarWorth } from '@/lib/stars';
 import { isDoneOn, todayStr } from '@/lib/choreCompletion';
@@ -28,6 +29,7 @@ const STATE_CONFIG = {
 export default function MyChores({ tasks, mode = 'normal' }) {
   const { localUser } = useLocalUser();
   const queryClient = useQueryClient();
+  const [tradeTask, setTradeTask] = useState(null);
 
   const myChores = useMemo(() =>
     tasks.filter(t =>
@@ -145,14 +147,24 @@ export default function MyChores({ tasks, mode = 'normal' }) {
                 </div>
 
                 {state === 'not_done' && (
-                  <Button
-                    size="sm" variant="outline"
-                    className="shrink-0 text-xs gap-1"
-                    onClick={() => submitForReview.mutate(chore)}
-                    disabled={submitForReview.isPending}
-                  >
-                    <Send className="w-3 h-3" /> Submit
-                  </Button>
+                  <>
+                    <Button
+                      size="icon" variant="ghost"
+                      className="shrink-0 h-8 w-8 text-muted-foreground"
+                      title="Trade this chore"
+                      onClick={() => setTradeTask(chore)}
+                    >
+                      <ArrowLeftRight className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button
+                      size="sm" variant="outline"
+                      className="shrink-0 text-xs gap-1"
+                      onClick={() => submitForReview.mutate(chore)}
+                      disabled={submitForReview.isPending}
+                    >
+                      <Send className="w-3 h-3" /> Submit
+                    </Button>
+                  </>
                 )}
 
                 {state === 'rejected' && (
@@ -169,6 +181,7 @@ export default function MyChores({ tasks, mode = 'normal' }) {
             );
           })}
         </ul>
+        {tradeTask && <TradeDialog task={tradeTask} onClose={() => setTradeTask(null)} />}
       </CardContent>
     </Card>
   );

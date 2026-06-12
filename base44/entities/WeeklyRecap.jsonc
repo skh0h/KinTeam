@@ -1,0 +1,42 @@
+{
+  "name": "WeeklyRecap",
+  "type": "object",
+  "properties": {
+    "week_of": {
+      "type": "string",
+      "format": "date"
+    },
+    "mvp_name": {
+      "type": "string"
+    },
+    "stats": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "member_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "emoji": {
+            "type": "string"
+          },
+          "stars": {
+            "type": "number"
+          },
+          "chores_done": {
+            "type": "number"
+          },
+          "chores_total": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "week_of"
+  ]
+}

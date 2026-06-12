@@ -1,0 +1,40 @@
+{
+  "name": "ChoreTrade",
+  "type": "object",
+  "properties": {
+    "task_id": {
+      "type": "string"
+    },
+    "task_title": {
+      "type": "string"
+    },
+    "from_member_id": {
+      "type": "string"
+    },
+    "from_member_name": {
+      "type": "string"
+    },
+    "to_member_id": {
+      "type": "string"
+    },
+    "to_member_name": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending_sibling",
+        "pending_admin",
+        "approved",
+        "rejected",
+        "declined"
+      ],
+      "default": "pending_sibling"
+    }
+  },
+  "required": [
+    "task_id",
+    "from_member_id",
+    "to_member_id"
+  ]
+}
