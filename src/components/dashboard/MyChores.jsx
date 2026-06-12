@@ -1,5 +1,6 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import confetti from 'canvas-confetti';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -53,6 +54,23 @@ export default function MyChores({ tasks }) {
     });
     return map;
   }, [alerts]);
+
+  // Celebrate freshly approved chores — only on the kid's own account
+  const celebrated = useRef(new Set());
+  const myName = localUser?.display_name || localUser?.name;
+  useEffect(() => {
+    if (!myName) return;
+    const fresh = alerts.filter(a =>
+      a.status === 'approved' && !a.user_notified &&
+      a.from_member === myName && !celebrated.current.has(a.id)
+    );
+    if (fresh.length === 0) return;
+    confetti({ particleCount: 140, spread: 80, origin: { y: 0.6 } });
+    fresh.forEach(a => {
+      celebrated.current.add(a.id);
+      base44.entities.AdminAlert.update(a.id, { user_notified: true });
+    });
+  }, [alerts, myName]);
 
   const submitForReview = useMutation({
     mutationFn: async (task) => {
