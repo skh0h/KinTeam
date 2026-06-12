@@ -46,7 +46,7 @@ export default function TeamLiftProject({ projectName, projectId, phases, onStat
             </div>
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-primary">{progress}%</span>
-              <DropdownMenu>
+              {isAdmin && <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0">
                     <MoreVertical className="w-4 h-4" />
@@ -67,7 +67,7 @@ export default function TeamLiftProject({ projectName, projectId, phases, onStat
                     <Trash2 className="w-4 h-4 mr-2" /> Delete Project
                   </DropdownMenuItem>
                 </DropdownMenuContent>
-              </DropdownMenu>
+              </DropdownMenu>}
             </div>
           </div>
           <Progress value={progress} className="h-1.5 mt-2" />
