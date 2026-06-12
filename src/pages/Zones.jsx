@@ -1,15 +1,14 @@
-import { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Plus } from 'lucide-react';
 import TaskCard from '@/components/zones/TaskCard';
-import AddChoreDialog from '@/components/zones/AddChoreDialog';
 import { useLocalUser } from '@/lib/LocalUserContext';
 
 export default function Zones() {
-  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const navigate = useNavigate();
   const { localUser } = useLocalUser();
   const isAdmin = localUser?.role === 'admin';
   const queryClient = useQueryClient();
@@ -22,11 +21,6 @@ export default function Zones() {
   const { data: members = [] } = useQuery({
     queryKey: ['members'],
     queryFn: () => base44.entities.FamilyMember.list(),
-  });
-
-  const createTask = useMutation({
-    mutationFn: (data) => base44.entities.FamilyTask.create(data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['tasks'] }),
   });
 
   const updateTask = useMutation({
@@ -53,7 +47,7 @@ export default function Zones() {
           <p className="text-muted-foreground mt-1">All household chores in one place.</p>
         </div>
         {isAdmin && (
-          <Button className="rounded-xl gap-2" onClick={() => setAddDialogOpen(true)}>
+          <Button className="rounded-xl gap-2" onClick={() => navigate('/workshop')}>
             <Plus className="w-4 h-4" /> Add Chore
           </Button>
         )}
@@ -77,15 +71,6 @@ export default function Zones() {
         ))}
       </div>
 
-      <AddChoreDialog
-        open={addDialogOpen}
-        onOpenChange={setAddDialogOpen}
-        onSubmit={(formData) => {
-          createTask.mutate({ ...formData, task_type: 'routine', phase: 'none', status: 'pending' });
-          setAddDialogOpen(false);
-        }}
-        members={members}
-      />
     </div>
   );
 }
