@@ -11,6 +11,7 @@ import ModeSelector from '@/components/dashboard/ModeSelector';
 import ModeScheduler from '@/components/dashboard/ModeScheduler';
 import WeeklyRecapCard from '@/components/dashboard/WeeklyRecapCard';
 import TradeRequests from '@/components/trades/TradeRequests';
+import StreakBadge from '@/components/dashboard/StreakBadge';
 
 export default function Dashboard() {
   const { localUser } = useLocalUser();
@@ -35,8 +36,9 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="flex items-center justify-between gap-3 flex-wrap">
         <h1 className="font-display text-3xl font-bold tracking-tight">Welcome Home</h1>
+        <StreakBadge />
       </div>
       {localUser?.role === 'admin' && <ModeSelector mode={mode} setMode={setMode} isSaving={isSaving} />}
       <TradeRequests />

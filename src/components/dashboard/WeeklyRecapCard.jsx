@@ -2,14 +2,17 @@ import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getWeekLabel } from '@/lib/weekUtils';
+import { startOfWeek, format } from 'date-fns';
 
 export default function WeeklyRecapCard() {
   const { data: recaps = [] } = useQuery({
     queryKey: ['weekly-recap'],
-    queryFn: () => base44.entities.WeeklyRecap.list('-created_date', 1),
+    queryFn: () => base44.entities.WeeklyRecap.list('-created_date', 5),
   });
 
-  const recap = recaps[0];
+  // Only show recaps for past weeks, never the current week
+  const currentWeek = format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd');
+  const recap = recaps.find(r => r.week_of < currentWeek);
   if (!recap) return null;
 
   const stats = [...(recap.stats || [])].sort((a, b) => b.stars - a.stars);
