@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { ClipboardList, Zap, CheckSquare, Plus, X } from 'lucide-react';
+import AiProjectBuilder from '@/components/teamlift/AiProjectBuilder';
 
 const phaseIcons = { prep: ClipboardList, execution: Zap, verification: CheckSquare };
 
@@ -73,6 +74,11 @@ export default function TeamLiftForm({ open, onOpenChange, onSubmit, members }) 
           <DialogTitle className="font-display">New Team-Lift Chore</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-5">
+          <AiProjectBuilder onBuilt={({ projectName: name, phases: builtPhases }) => {
+            setProjectName(name);
+            setPhases(builtPhases);
+          }} />
+
           <div>
             <Label>Project Name</Label>
             <Input value={projectName} onChange={(e) => setProjectName(e.target.value)} placeholder="e.g., Deep Clean Kitchen" className="mt-1" />
