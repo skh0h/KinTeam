@@ -57,7 +57,7 @@ export default function TaskCard({ task, onStatusChange, onDelete, onAssign, onP
                 <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{task.notes}</p>
               )}
             </div>
-            <DropdownMenu>
+            {isAdmin && <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0">
                   <MoreVertical className="w-4 h-4" />
@@ -111,7 +111,7 @@ export default function TaskCard({ task, onStatusChange, onDelete, onAssign, onP
                   <Trash2 className="w-4 h-4 mr-2" /> Delete
                 </DropdownMenuItem>
               </DropdownMenuContent>
-            </DropdownMenu>
+            </DropdownMenu>}
           </div>
         </CardContent>
       </Card>
