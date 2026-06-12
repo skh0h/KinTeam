@@ -117,7 +117,7 @@ export default function TodayChoreList({ tasks, members, isAdmin, currentMemberI
             {chores.map(chore => {
               const done = chore.status === 'done';
               const assignee = chore.assigned_to ? memberMap[chore.assigned_to] : null;
-              const canToggle = isAdmin || !chore.assigned_to || chore.assigned_to === currentMemberId;
+              const canToggle = isAdmin;
               return (
                 <li
                   key={chore.id}
