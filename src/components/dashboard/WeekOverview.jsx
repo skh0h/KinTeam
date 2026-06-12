@@ -21,9 +21,13 @@ export default function WeekOverview({ tasks, mode = 'normal' }) {
   const choreProgress = choreTasks.length > 0 ? choresDone / choreTasks.length : 0;
   const teamLiftProgress = teamLiftTasks.length > 0 ? teamLiftDone / teamLiftTasks.length : 0;
 
+  // Workhorse mode shifts weighting to 40% chores / 60% team lift
+  const choreWeight = mode === 'workhorse' ? 40 : 75;
+  const liftWeight = 100 - choreWeight;
+
   const progress = mode === 'vacation' ? 100 : Math.round(
     hasTeamLift
-      ? (choreProgress * 0.75 + teamLiftProgress * 0.25) * 100
+      ? (choreProgress * (choreWeight / 100) + teamLiftProgress * (liftWeight / 100)) * 100
       : choreProgress * 100
   );
 
@@ -49,18 +53,18 @@ export default function WeekOverview({ tasks, mode = 'normal' }) {
         <div className="relative h-2.5 bg-muted rounded-full overflow-hidden mb-2">
           <div
             className="absolute left-0 top-0 h-full bg-primary transition-all duration-700"
-            style={{ width: `${hasTeamLift ? choreProgress * 75 : choreProgress * 100}%` }}
+            style={{ width: `${hasTeamLift ? choreProgress * choreWeight : choreProgress * 100}%` }}
           />
           {hasTeamLift && (
             <div
               className="absolute top-0 h-full bg-accent transition-all duration-700"
-              style={{ left: `${choreProgress * 75}%`, width: `${teamLiftProgress * 25}%` }}
+              style={{ left: `${choreProgress * choreWeight}%`, width: `${teamLiftProgress * liftWeight}%` }}
             />
           )}
         </div>
         <div className="flex justify-between text-xs text-muted-foreground mb-4">
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-primary inline-block" />Chores {hasTeamLift ? '75%' : '100%'}</span>
-          {hasTeamLift && <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-accent inline-block" />Team Lift 25%</span>}
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-primary inline-block" />Chores {hasTeamLift ? `${choreWeight}%` : '100%'}</span>
+          {hasTeamLift && <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-accent inline-block" />Team Lift {liftWeight}%</span>}
         </div>
 
         <div className="grid grid-cols-2 gap-3">

@@ -8,7 +8,7 @@ export default function ModeSelector({ mode, setMode, isSaving }) {
         <CardTitle className="font-display text-lg">Household Mode</CardTitle>
       </CardHeader>
       <CardContent className="pt-0">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {Object.entries(MODES).map(([key, cfg]) => (
             <button
               key={key}
