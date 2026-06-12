@@ -108,7 +108,7 @@ export default function TeamLiftProject({ projectName, projectId, phases, member
             const stepsDone = steps.filter(s => s.done).length;
             const matchesMe = (name) => !!name && (name === localUser?.name || name === localUser?.display_name);
             const canEdit = isAdmin || matchesMe(task.assigned_to);
-            const canEditStep = (step) => canEdit || matchesMe(step.assigned_to);
+            const canEditStep = (step) => (canEdit || matchesMe(step.assigned_to)) && (isAdmin || !step.done);
             const hasAnyAccess = canEdit || steps.some(s => matchesMe(s.assigned_to));
 
             return (
