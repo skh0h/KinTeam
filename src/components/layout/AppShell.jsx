@@ -63,7 +63,7 @@ export default function AppShell() {
       </main>
 
       {/* Mobile bottom nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t bg-background/90 backdrop-blur-lg">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t bg-background/90 backdrop-blur-lg pb-[env(safe-area-inset-bottom)]">
         <div className="flex justify-around items-center h-16 px-2">
           {navItems.map(item => {
             const Icon = item.icon;
