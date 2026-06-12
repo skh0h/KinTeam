@@ -7,7 +7,7 @@ import { getCurrentWeekMonday } from '@/lib/weekUtils';
 const DOW_MAP = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 const WEEK_DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
-export default function TodayChoreList({ tasks, members, isAdmin, onToggle }) {
+export default function TodayChoreList({ tasks, members, isAdmin, currentMemberId, onToggle }) {
   const today = new Date();
   const todayDowIndex = (getDay(today) + 6) % 7; // Mon=0 ... Sun=6
   const weekOf = getCurrentWeekMonday();
@@ -117,12 +117,15 @@ export default function TodayChoreList({ tasks, members, isAdmin, onToggle }) {
             {chores.map(chore => {
               const done = chore.status === 'done';
               const assignee = chore.assigned_to ? memberMap[chore.assigned_to] : null;
+              const canToggle = isAdmin || !chore.assigned_to || chore.assigned_to === currentMemberId;
               return (
                 <li
                   key={chore.id}
-                  onClick={() => onToggle && onToggle(chore.id, done ? 'pending' : 'done')}
-                  className={`flex items-center gap-3 p-2.5 rounded-lg transition-colors cursor-pointer ${
-                    done ? 'bg-accent/10 hover:bg-accent/20' : 'bg-muted/40 hover:bg-muted'
+                  onClick={() => canToggle && onToggle && onToggle(chore.id, done ? 'pending' : 'done')}
+                  className={`flex items-center gap-3 p-2.5 rounded-lg transition-colors ${
+                    canToggle ? 'cursor-pointer' : 'cursor-default opacity-70'
+                  } ${
+                    done ? 'bg-accent/10 hover:bg-accent/20' : canToggle ? 'bg-muted/40 hover:bg-muted' : 'bg-muted/40'
                   }`}
                 >
                   {done

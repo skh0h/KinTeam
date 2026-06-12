@@ -32,7 +32,7 @@ export default function Dashboard() {
       </div>
       <WeekOverview tasks={tasks} />
       <MyChores tasks={tasks} />
-      <TodayChoreList tasks={tasks} members={members} isAdmin={localUser?.role === 'admin'} onToggle={(id, status) => toggleChore.mutate({ id, status })} />
+      <TodayChoreList tasks={tasks} members={members} isAdmin={localUser?.role === 'admin'} currentMemberId={localUser?.id} onToggle={(id, status) => toggleChore.mutate({ id, status })} />
       {localUser?.role === 'admin' && <AdminAlerts />}
     </div>
   );
