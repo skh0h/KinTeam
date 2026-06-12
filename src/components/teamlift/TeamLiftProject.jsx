@@ -81,7 +81,7 @@ export default function TeamLiftProject({ projectName, projectId, phases, onStat
             const Icon = phaseIcons[task.phase] || ClipboardList;
             const steps = task.steps || [];
             const stepsDone = steps.filter(s => s.done).length;
-            const canEdit = isAdmin || task.assigned_to === localUser?.id;
+            const canEdit = isAdmin || task.assigned_to === localUser?.name || task.assigned_to === localUser?.display_name;
 
             return (
               <div key={task.id} className="rounded-lg border bg-card p-3 space-y-2">
