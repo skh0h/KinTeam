@@ -58,7 +58,7 @@ export default function AppShell() {
       </header>
 
       {/* Main content */}
-      <main className="max-w-5xl mx-auto px-4 py-6 pb-24 md:pb-6">
+      <main className="max-w-5xl mx-auto px-4 py-6 pb-[calc(7rem+env(safe-area-inset-bottom))] md:pb-6">
         <Outlet />
       </main>
 
