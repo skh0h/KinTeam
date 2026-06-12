@@ -106,7 +106,10 @@ export default function TeamLiftProject({ projectName, projectId, phases, member
             const Icon = phaseIcons[task.phase] || ClipboardList;
             const steps = task.steps || [];
             const stepsDone = steps.filter(s => s.done).length;
-            const canEdit = isAdmin || task.assigned_to === localUser?.name || task.assigned_to === localUser?.display_name;
+            const matchesMe = (name) => !!name && (name === localUser?.name || name === localUser?.display_name);
+            const canEdit = isAdmin || matchesMe(task.assigned_to);
+            const canEditStep = (step) => canEdit || matchesMe(step.assigned_to);
+            const hasAnyAccess = canEdit || steps.some(s => matchesMe(s.assigned_to));
 
             return (
               <div key={task.id} className="rounded-lg border bg-card p-3 space-y-2">
@@ -119,7 +122,7 @@ export default function TeamLiftProject({ projectName, projectId, phases, member
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    {!canEdit && <Lock className="w-3.5 h-3.5 text-muted-foreground" />}
+                    {!hasAnyAccess && <Lock className="w-3.5 h-3.5 text-muted-foreground" />}
                     <StatusBadge status={task.status} />
                     {canEdit && <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -183,9 +186,9 @@ export default function TeamLiftProject({ projectName, projectId, phases, member
                     {steps.map(step => (
                       <div key={step.id} className="flex items-center gap-2">
                         <button
-                          onClick={() => canEdit && toggleStep(task, step.id)}
-                          disabled={!canEdit}
-                          className={`flex items-center gap-2 flex-1 text-left group ${!canEdit ? 'cursor-not-allowed opacity-60' : ''}`}
+                          onClick={() => canEditStep(step) && toggleStep(task, step.id)}
+                          disabled={!canEditStep(step)}
+                          className={`flex items-center gap-2 flex-1 text-left group ${!canEditStep(step) ? 'cursor-not-allowed opacity-60' : ''}`}
                         >
                           <span className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${
                             step.done ? 'bg-accent border-accent' : 'border-border group-hover:border-primary'
