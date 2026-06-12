@@ -15,26 +15,8 @@ export default function AiChoreBuilder({ onBuilt }) {
 
     const { file_url } = await base44.integrations.Core.UploadFile({ file });
 
-    const result = await base44.integrations.Core.InvokeLLM({
-      prompt: `You are helping build a household chore card from a photo. Look at the photo and figure out what chore needs to be done (e.g. dirty dishes -> "Wash the dishes", messy lawn -> "Mow the lawn", overflowing bin -> "Take out the bins").
-
-Return:
-- title: a short, clear chore name (max 6 words)
-- occurrence: how often this chore typically needs doing. One of: daily, weekly, fortnightly, monthly, as_needed
-- stars: how much effort/reward it deserves from 1 (quick & easy) to 5 (big job)
-- notes: one short helpful sentence describing what specifically needs doing based on the photo`,
-      file_urls: [file_url],
-      response_json_schema: {
-        type: 'object',
-        properties: {
-          title: { type: 'string' },
-          occurrence: { type: 'string', enum: ['daily', 'weekly', 'fortnightly', 'monthly', 'as_needed'] },
-          stars: { type: 'number' },
-          notes: { type: 'string' },
-        },
-        required: ['title', 'occurrence', 'stars', 'notes'],
-      },
-    });
+    const response = await base44.functions.invoke('analyzeChorePhoto', { file_url });
+    const result = response.data;
 
     onBuilt({
       title: result.title,
