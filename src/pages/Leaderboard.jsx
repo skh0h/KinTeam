@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Trophy } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getStarWorth } from '@/lib/stars';
+import { isDaily } from '@/lib/choreCompletion';
 
 const rankEmojis = ['🥇', '🥈', '🥉'];
 
@@ -23,11 +24,17 @@ export default function Leaderboard() {
   const entries = useMemo(() => {
     const totals = {};
     tasks
-      .filter(t => t.task_type === 'routine' && t.status === 'done' && !t.archived)
+      .filter(t => t.task_type === 'routine' && !t.archived)
       .forEach(t => {
         const memberId = t.permanent_assigned_to || t.assigned_to;
         if (!memberId) return;
-        totals[memberId] = (totals[memberId] || 0) + getStarWorth(t);
+        if (isDaily(t)) {
+          // Daily chores earn stars for each completed day
+          const days = (t.completed_dates || []).length;
+          if (days > 0) totals[memberId] = (totals[memberId] || 0) + getStarWorth(t) * days;
+        } else if (t.status === 'done') {
+          totals[memberId] = (totals[memberId] || 0) + getStarWorth(t);
+        }
       });
 
     return members

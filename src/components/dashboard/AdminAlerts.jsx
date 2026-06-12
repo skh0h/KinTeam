@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Bell, CheckCircle2, XCircle } from 'lucide-react';
+import { completionUpdate, todayStr } from '@/lib/choreCompletion';
 
 export default function AdminAlerts() {
   const queryClient = useQueryClient();
@@ -15,7 +16,8 @@ export default function AdminAlerts() {
 
   const approve = useMutation({
     mutationFn: async (alert) => {
-      await base44.entities.FamilyTask.update(alert.task_id, { status: 'done' });
+      const [task] = await base44.entities.FamilyTask.filter({ id: alert.task_id });
+      await base44.entities.FamilyTask.update(alert.task_id, completionUpdate(task, todayStr(), true));
       await base44.entities.AdminAlert.update(alert.id, { status: 'approved' });
     },
     onSuccess: () => {

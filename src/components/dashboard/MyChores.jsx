@@ -7,9 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Circle, Clock, XCircle, CheckCircle2, Send } from 'lucide-react';
 import { useLocalUser } from '@/lib/LocalUserContext';
 import { getStarWorth } from '@/lib/stars';
+import { isDoneOn, todayStr } from '@/lib/choreCompletion';
 
 function getChoreState(task, alertsByTaskId) {
-  if (task.status === 'done') return 'done';
+  if (isDoneOn(task, todayStr())) return 'done';
   const alert = alertsByTaskId[task.id];
   if (alert?.status === 'rejected') return 'rejected';
   if (alert?.status === 'pending') return 'pending_review';

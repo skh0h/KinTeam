@@ -5,13 +5,15 @@ import AdminAlerts from '@/components/dashboard/AdminAlerts';
 import TodayChoreList from '@/components/dashboard/TodayChoreList';
 import MyChores from '@/components/dashboard/MyChores';
 import { useLocalUser } from '@/lib/LocalUserContext';
+import { completionUpdate } from '@/lib/choreCompletion';
 
 export default function Dashboard() {
   const { localUser } = useLocalUser();
   const queryClient = useQueryClient();
 
   const toggleChore = useMutation({
-    mutationFn: ({ id, status }) => base44.entities.FamilyTask.update(id, { status }),
+    mutationFn: ({ task, dateStr, done }) =>
+      base44.entities.FamilyTask.update(task.id, completionUpdate(task, dateStr, done)),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['tasks'] }),
   });
 
@@ -32,7 +34,7 @@ export default function Dashboard() {
       </div>
       <WeekOverview tasks={tasks} />
       <MyChores tasks={tasks} />
-      <TodayChoreList tasks={tasks} members={members} isAdmin={localUser?.role === 'admin'} currentMemberId={localUser?.id} onToggle={(id, status) => toggleChore.mutate({ id, status })} />
+      <TodayChoreList tasks={tasks} members={members} isAdmin={localUser?.role === 'admin'} currentMemberId={localUser?.id} onToggle={(task, dateStr, done) => toggleChore.mutate({ task, dateStr, done })} />
       {localUser?.role === 'admin' && <AdminAlerts />}
     </div>
   );

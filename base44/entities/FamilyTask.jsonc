@@ -109,6 +109,13 @@
       "default": false,
       "description": "Whether the task/project is archived"
     },
+    "completed_dates": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Dates (yyyy-MM-dd) the chore was completed \u2014 used for daily chores"
+    },
     "steps": {
       "type": "array",
       "items": {

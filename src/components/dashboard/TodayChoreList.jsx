@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle2, Circle, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, getDay, addDays, startOfWeek } from 'date-fns';
 import { getCurrentWeekMonday } from '@/lib/weekUtils';
+import { isDoneOn } from '@/lib/choreCompletion';
 
 const DOW_MAP = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 const WEEK_DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -19,6 +20,8 @@ export default function TodayChoreList({ tasks, members, isAdmin, currentMemberI
   const weekStart = startOfWeek(today, { weekStartsOn: 1 });
   const selectedDate = addDays(weekStart, selectedDayIndex);
 
+  const selectedDateStr = format(selectedDate, 'yyyy-MM-dd');
+
   const chores = useMemo(() => {
     return tasks
       .filter(t =>
@@ -27,11 +30,13 @@ export default function TodayChoreList({ tasks, members, isAdmin, currentMemberI
         (t.due_day === selectedDayName || t.due_day === 'any')
       )
       .sort((a, b) => {
-        if (a.status === 'done' && b.status !== 'done') return 1;
-        if (a.status !== 'done' && b.status === 'done') return -1;
+        const aDone = isDoneOn(a, selectedDateStr);
+        const bDone = isDoneOn(b, selectedDateStr);
+        if (aDone && !bDone) return 1;
+        if (!aDone && bDone) return -1;
         return 0;
       });
-  }, [tasks, weekOf, selectedDayName]);
+  }, [tasks, weekOf, selectedDayName, selectedDateStr]);
 
   const memberMap = useMemo(() => {
     const map = {};
@@ -39,7 +44,7 @@ export default function TodayChoreList({ tasks, members, isAdmin, currentMemberI
     return map;
   }, [members]);
 
-  const doneCount = chores.filter(t => t.status === 'done').length;
+  const doneCount = chores.filter(t => isDoneOn(t, selectedDateStr)).length;
   const total = chores.length;
   const pct = total > 0 ? Math.round((doneCount / total) * 100) : 0;
 
@@ -115,13 +120,13 @@ export default function TodayChoreList({ tasks, members, isAdmin, currentMemberI
         ) : (
           <ul className="space-y-2">
             {chores.map(chore => {
-              const done = chore.status === 'done';
+              const done = isDoneOn(chore, selectedDateStr);
               const assignee = chore.assigned_to ? memberMap[chore.assigned_to] : null;
               const canToggle = isAdmin;
               return (
                 <li
                   key={chore.id}
-                  onClick={() => canToggle && onToggle && onToggle(chore.id, done ? 'pending' : 'done')}
+                  onClick={() => canToggle && onToggle && onToggle(chore, selectedDateStr, !done)}
                   className={`flex items-center gap-3 p-2.5 rounded-lg transition-colors ${
                     canToggle ? 'cursor-pointer' : 'cursor-default opacity-70'
                   } ${
