@@ -8,6 +8,7 @@ import { ClipboardList, Zap, CheckSquare, Trash2, ChevronDown, MoreVertical, Cir
 import StatusBadge from '@/components/shared/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { useLocalUser } from '@/lib/LocalUserContext';
 
 const phaseIcons = { prep: ClipboardList, execution: Zap, verification: CheckSquare };
 const phaseLabels = { prep: 'Prep', execution: 'Execution', verification: 'Verification' };
@@ -16,6 +17,8 @@ const phaseOrder = ['prep', 'execution', 'verification'];
 export default function TeamLiftProject({ projectName, projectId, phases, onStatusChange, onDelete, onDeleteProject }) {
   const [expanded, setExpanded] = useState(false);
   const queryClient = useQueryClient();
+  const { localUser } = useLocalUser();
+  const isAdmin = localUser?.role === 'admin';
   const total = phases.length;
   const done = phases.filter(t => t.status === 'done').length;
   const progress = total > 0 ? Math.round((done / total) * 100) : 0;
@@ -78,6 +81,7 @@ export default function TeamLiftProject({ projectName, projectId, phases, onStat
             const Icon = phaseIcons[task.phase] || ClipboardList;
             const steps = task.steps || [];
             const stepsDone = steps.filter(s => s.done).length;
+            const canEdit = isAdmin || task.assigned_to === localUser?.id;
 
             return (
               <div key={task.id} className="rounded-lg border bg-card p-3 space-y-2">
@@ -91,7 +95,7 @@ export default function TeamLiftProject({ projectName, projectId, phases, onStat
                   </div>
                   <div className="flex items-center gap-2">
                     <StatusBadge status={task.status} />
-                    <DropdownMenu>
+                    {canEdit && <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0">
                           <MoreVertical className="w-4 h-4" />
@@ -112,7 +116,7 @@ export default function TeamLiftProject({ projectName, projectId, phases, onStat
                           <Trash2 className="w-4 h-4 mr-2" /> Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
-                    </DropdownMenu>
+                    </DropdownMenu>}
                   </div>
                 </div>
 
@@ -136,8 +140,9 @@ export default function TeamLiftProject({ projectName, projectId, phases, onStat
                     {steps.map(step => (
                       <button
                         key={step.id}
-                        onClick={() => toggleStep(task, step.id)}
-                        className="flex items-center gap-2 w-full text-left group"
+                        onClick={() => canEdit && toggleStep(task, step.id)}
+                        disabled={!canEdit}
+                        className={`flex items-center gap-2 w-full text-left group ${!canEdit ? 'cursor-not-allowed opacity-60' : ''}`}
                       >
                         <span className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${
                           step.done ? 'bg-accent border-accent' : 'border-border group-hover:border-primary'
