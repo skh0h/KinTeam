@@ -1,6 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { CheckCircle2 } from 'lucide-react';
 import { getWeekLabel, getCurrentWeekMonday } from '@/lib/weekUtils';
+import { isProjectComplete } from '@/lib/taskProgress';
 
 export default function WeekOverview({ tasks }) {
   const weekTasks = tasks.filter(t => !t.week_of || t.week_of === getCurrentWeekMonday());
@@ -11,7 +12,7 @@ export default function WeekOverview({ tasks }) {
   const teamLiftTasks = weekTasks.filter(t => t.task_type === 'team_lift' && !t.parent_task_id);
 
   const choresDone = choreTasks.filter(t => t.status === 'done').length;
-  const teamLiftDone = teamLiftTasks.filter(t => t.status === 'done').length;
+  const teamLiftDone = teamLiftTasks.filter(t => isProjectComplete(t, tasks)).length;
 
   const hasTeamLift = teamLiftTasks.length > 0;
 

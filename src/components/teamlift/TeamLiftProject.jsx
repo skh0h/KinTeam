@@ -9,6 +9,7 @@ import StatusBadge from '@/components/shared/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useLocalUser } from '@/lib/LocalUserContext';
+import { isPhaseComplete } from '@/lib/taskProgress';
 
 const phaseIcons = { prep: ClipboardList, execution: Zap, verification: CheckSquare };
 const phaseLabels = { prep: 'Prep', execution: 'Execution', verification: 'Verification' };
@@ -20,7 +21,7 @@ export default function TeamLiftProject({ projectName, projectId, phases, onStat
   const { localUser } = useLocalUser();
   const isAdmin = localUser?.role === 'admin';
   const total = phases.length;
-  const done = phases.filter(t => t.status === 'done').length;
+  const done = phases.filter(isPhaseComplete).length;
   const progress = total > 0 ? Math.round((done / total) * 100) : 0;
 
   const syncParentStatus = async (updatedPhase) => {
