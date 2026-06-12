@@ -7,7 +7,8 @@ export default function WeekOverview({ tasks }) {
 
   // Chores = routine tasks (75% weight), Team Lift = phase sub-tasks (25% weight)
   const choreTasks = weekTasks.filter(t => t.task_type === 'routine' || (!t.task_type && !t.parent_task_id));
-  const teamLiftTasks = weekTasks.filter(t => t.task_type === 'team_lift' && t.parent_task_id);
+  // Count projects (parent tasks), not phases
+  const teamLiftTasks = weekTasks.filter(t => t.task_type === 'team_lift' && !t.parent_task_id);
 
   const choresDone = choreTasks.filter(t => t.status === 'done').length;
   const teamLiftDone = teamLiftTasks.filter(t => t.status === 'done').length;
