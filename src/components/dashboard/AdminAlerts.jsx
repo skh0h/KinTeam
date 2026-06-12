@@ -26,7 +26,11 @@ export default function AdminAlerts() {
 
   const reject = useMutation({
     mutationFn: async (alert) => {
-      await base44.entities.FamilyTask.update(alert.task_id, { status: 'pending' });
+      const [task] = await base44.entities.FamilyTask.filter({ id: alert.task_id });
+      await base44.entities.FamilyTask.update(alert.task_id, {
+        status: 'pending',
+        stars_penalty: (task?.stars_penalty ?? 0) + 1,
+      });
       await base44.entities.AdminAlert.update(alert.id, { status: 'rejected', user_notified: false });
     },
     onSuccess: () => {

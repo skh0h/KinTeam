@@ -79,6 +79,16 @@
       ],
       "default": "medium"
     },
+    "stars": {
+      "type": "number",
+      "default": 1,
+      "description": "How many stars the chore is worth"
+    },
+    "stars_penalty": {
+      "type": "number",
+      "default": 0,
+      "description": "Stars deducted from worth (1 per rejection)"
+    },
     "due_date": {
       "type": "string",
       "format": "date"

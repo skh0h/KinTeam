@@ -27,7 +27,7 @@ const DAYS = [
   { value: 'sunday', label: 'Sunday' },
 ];
 
-const empty = { title: '', occurrence: 'weekly', priority: 'medium', due_day: 'any', notes: '', assigned_to: '', permanent_assigned_to: '', photo_url: '' };
+const empty = { title: '', occurrence: 'weekly', priority: 'medium', due_day: 'any', notes: '', assigned_to: '', permanent_assigned_to: '', photo_url: '', stars: 1 };
 
 export default function AddChoreDialog({ open, onOpenChange, onSubmit, members }) {
   const [form, setForm] = useState(empty);
@@ -93,6 +93,18 @@ export default function AddChoreDialog({ open, onOpenChange, onSubmit, members }
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <div>
+            <Label>Worth (stars)</Label>
+            <Select value={String(form.stars)} onValueChange={(v) => set('stars', Number(v))}>
+              <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {[1, 2, 3, 4, 5].map(n => (
+                  <SelectItem key={n} value={String(n)}>{'⭐'.repeat(n)} {n} star{n > 1 ? 's' : ''}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div>

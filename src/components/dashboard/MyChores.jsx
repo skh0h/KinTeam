@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Circle, Clock, XCircle, CheckCircle2, Send } from 'lucide-react';
 import { useLocalUser } from '@/lib/LocalUserContext';
+import { getStarWorth } from '@/lib/stars';
 
 function getChoreState(task, alertsByTaskId) {
   if (task.status === 'done') return 'done';
@@ -115,6 +116,9 @@ export default function MyChores({ tasks }) {
                 <div className="flex-1 min-w-0">
                   <p className={`text-sm font-medium ${state === 'done' ? 'line-through text-muted-foreground' : ''}`}>
                     {chore.title}
+                    <span className="ml-2 text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full font-normal">
+                      ⭐ {getStarWorth(chore)}
+                    </span>
                   </p>
                   <p className={`text-xs mt-0.5 ${iconColor}`}>{label}</p>
                 </div>

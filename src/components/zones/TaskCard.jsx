@@ -5,6 +5,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { MoreVertical, CheckCircle2, Clock, Circle, Trash2, UserX, User, Pin } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { getStarWorth } from '@/lib/stars';
 
 const isUnassigned = (v) => !v || v === '' || v === 'anyone';
 
@@ -30,6 +31,9 @@ export default function TaskCard({ task, onStatusChange, onDelete, onAssign, onP
               </p>
               <div className="flex flex-wrap items-center gap-1.5 mt-2">
                 <StatusBadge status={task.status} />
+                <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
+                  ⭐ {getStarWorth(task)}
+                </span>
                 {task.occurrence && task.occurrence !== 'as_needed' && (
                   <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full capitalize">
                     {task.occurrence === 'fortnightly' ? 'Every 2 wks' : task.occurrence}
