@@ -23,11 +23,28 @@ export default function TeamLiftProject({ projectName, projectId, phases, onStat
   const done = phases.filter(t => t.status === 'done').length;
   const progress = total > 0 ? Math.round((done / total) * 100) : 0;
 
+  const syncParentStatus = async (updatedPhase) => {
+    const updatedPhases = phases.map(p => p.id === updatedPhase.id ? updatedPhase : p);
+    const allDone = updatedPhases.every(p => p.status === 'done');
+    const anyStarted = updatedPhases.some(p => p.status !== 'pending');
+    const status = allDone ? 'done' : anyStarted ? 'in_progress' : 'pending';
+    await base44.entities.FamilyTask.update(projectId, { status });
+  };
+
   const toggleStep = async (task, stepId) => {
     const steps = (task.steps || []).map(s =>
       s.id === stepId ? { ...s, done: !s.done } : s
     );
-    await base44.entities.FamilyTask.update(task.id, { steps });
+    const allStepsDone = steps.length > 0 && steps.every(s => s.done);
+    const status = allStepsDone ? 'done' : steps.some(s => s.done) ? 'in_progress' : 'pending';
+    await base44.entities.FamilyTask.update(task.id, { steps, status });
+    await syncParentStatus({ ...task, status });
+    queryClient.invalidateQueries({ queryKey: ['tasks'] });
+  };
+
+  const setPhaseStatus = async (task, status) => {
+    await base44.entities.FamilyTask.update(task.id, { status });
+    await syncParentStatus({ ...task, status });
     queryClient.invalidateQueries({ queryKey: ['tasks'] });
   };
 
@@ -103,13 +120,13 @@ export default function TeamLiftProject({ projectName, projectId, phases, onStat
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => onStatusChange(task.id, 'pending')}>
+                        <DropdownMenuItem onClick={() => setPhaseStatus(task, 'pending')}>
                           <Circle className="w-4 h-4 mr-2 text-muted-foreground" /> Pending
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onStatusChange(task.id, 'in_progress')}>
+                        <DropdownMenuItem onClick={() => setPhaseStatus(task, 'in_progress')}>
                           <Clock className="w-4 h-4 mr-2 text-primary" /> In Progress
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onStatusChange(task.id, 'done')}>
+                        <DropdownMenuItem onClick={() => setPhaseStatus(task, 'done')}>
                           <CheckCircle2 className="w-4 h-4 mr-2 text-emerald-600" /> Done
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
