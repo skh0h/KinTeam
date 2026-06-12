@@ -4,10 +4,10 @@ import { Progress } from '@/components/ui/progress';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
-import { ClipboardList, Zap, CheckSquare, Trash2, ChevronDown, MoreVertical, Circle, Clock, CheckCircle2, Lock, Archive } from 'lucide-react';
+import { ClipboardList, Zap, CheckSquare, Trash2, ChevronDown, MoreVertical, Circle, Clock, CheckCircle2, Lock, Archive, User, UserX } from 'lucide-react';
 import StatusBadge from '@/components/shared/StatusBadge';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { useLocalUser } from '@/lib/LocalUserContext';
 import { isPhaseComplete } from '@/lib/taskProgress';
 
@@ -15,7 +15,7 @@ const phaseIcons = { prep: ClipboardList, execution: Zap, verification: CheckSqu
 const phaseLabels = { prep: 'Prep', execution: 'Execution', verification: 'Verification' };
 const phaseOrder = ['prep', 'execution', 'verification'];
 
-export default function TeamLiftProject({ projectName, projectId, phases, onStatusChange, onDelete, onDeleteProject, onArchiveProject }) {
+export default function TeamLiftProject({ projectName, projectId, phases, members = [], onStatusChange, onDelete, onDeleteProject, onArchiveProject }) {
   const [expanded, setExpanded] = useState(false);
   const queryClient = useQueryClient();
   const { localUser } = useLocalUser();
@@ -40,6 +40,19 @@ export default function TeamLiftProject({ projectName, projectId, phases, onStat
     const status = allStepsDone ? 'done' : steps.some(s => s.done) ? 'in_progress' : 'pending';
     await base44.entities.FamilyTask.update(task.id, { steps, status });
     await syncParentStatus({ ...task, status });
+    queryClient.invalidateQueries({ queryKey: ['tasks'] });
+  };
+
+  const reassignPhase = async (task, name) => {
+    await base44.entities.FamilyTask.update(task.id, { assigned_to: name });
+    queryClient.invalidateQueries({ queryKey: ['tasks'] });
+  };
+
+  const reassignStep = async (task, stepId, name) => {
+    const steps = (task.steps || []).map(s =>
+      s.id === stepId ? { ...s, assigned_to: name } : s
+    );
+    await base44.entities.FamilyTask.update(task.id, { steps });
     queryClient.invalidateQueries({ queryKey: ['tasks'] });
   };
 
@@ -124,6 +137,23 @@ export default function TeamLiftProject({ projectName, projectId, phases, onStat
                         <DropdownMenuItem onClick={() => setPhaseStatus(task, 'done')}>
                           <CheckCircle2 className="w-4 h-4 mr-2 text-emerald-600" /> Done
                         </DropdownMenuItem>
+                        {isAdmin && members.length > 0 && (
+                          <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">Reassign to</DropdownMenuLabel>
+                            {members.map(m => (
+                              <DropdownMenuItem key={m.id} onClick={() => reassignPhase(task, m.display_name || m.name)}>
+                                <User className="w-4 h-4 mr-2 text-muted-foreground" />
+                                {m.avatar_emoji ? `${m.avatar_emoji} ` : ''}{m.display_name || m.name}
+                              </DropdownMenuItem>
+                            ))}
+                            {task.assigned_to && (
+                              <DropdownMenuItem onClick={() => reassignPhase(task, '')}>
+                                <UserX className="w-4 h-4 mr-2 text-muted-foreground" /> Unassign
+                              </DropdownMenuItem>
+                            )}
+                          </>
+                        )}
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => onDelete(task.id)} className="text-destructive">
                           <Trash2 className="w-4 h-4 mr-2" /> Delete
@@ -151,24 +181,48 @@ export default function TeamLiftProject({ projectName, projectId, phases, onStat
                       Steps: {stepsDone}/{steps.length}
                     </p>
                     {steps.map(step => (
-                      <button
-                        key={step.id}
-                        onClick={() => canEdit && toggleStep(task, step.id)}
-                        disabled={!canEdit}
-                        className={`flex items-center gap-2 w-full text-left group ${!canEdit ? 'cursor-not-allowed opacity-60' : ''}`}
-                      >
-                        <span className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${
-                          step.done ? 'bg-accent border-accent' : 'border-border group-hover:border-primary'
-                        }`}>
-                          {step.done && <span className="text-white text-[10px]">✓</span>}
-                        </span>
-                        <span className={`text-xs flex-1 ${step.done ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
-                          {step.text}
-                        </span>
-                        {step.assigned_to && step.assigned_to !== 'unassigned' && (
-                          <span className="text-xs text-muted-foreground">{step.assigned_to}</span>
+                      <div key={step.id} className="flex items-center gap-2">
+                        <button
+                          onClick={() => canEdit && toggleStep(task, step.id)}
+                          disabled={!canEdit}
+                          className={`flex items-center gap-2 flex-1 text-left group ${!canEdit ? 'cursor-not-allowed opacity-60' : ''}`}
+                        >
+                          <span className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${
+                            step.done ? 'bg-accent border-accent' : 'border-border group-hover:border-primary'
+                          }`}>
+                            {step.done && <span className="text-white text-[10px]">✓</span>}
+                          </span>
+                          <span className={`text-xs flex-1 ${step.done ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
+                            {step.text}
+                          </span>
+                        </button>
+                        {isAdmin ? (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <button className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 shrink-0">
+                                <User className="w-3 h-3" />
+                                {step.assigned_to && step.assigned_to !== 'unassigned' ? step.assigned_to : 'Assign'}
+                              </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              {members.map(m => (
+                                <DropdownMenuItem key={m.id} onClick={() => reassignStep(task, step.id, m.display_name || m.name)}>
+                                  {m.avatar_emoji ? `${m.avatar_emoji} ` : ''}{m.display_name || m.name}
+                                </DropdownMenuItem>
+                              ))}
+                              {step.assigned_to && step.assigned_to !== 'unassigned' && (
+                                <DropdownMenuItem onClick={() => reassignStep(task, step.id, '')}>
+                                  <UserX className="w-4 h-4 mr-2 text-muted-foreground" /> Unassign
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        ) : (
+                          step.assigned_to && step.assigned_to !== 'unassigned' && (
+                            <span className="text-xs text-muted-foreground shrink-0">{step.assigned_to}</span>
+                          )
                         )}
-                      </button>
+                      </div>
                     ))}
                   </div>
                 )}

@@ -113,6 +113,7 @@ export default function TeamLift() {
             projectId={project.id}
             projectName={project.title}
             phases={project.phases}
+            members={members}
             onStatusChange={(id, status) => updateTask.mutate({ id, data: { status } })}
             onDelete={(id) => deleteTask.mutate(id)}
             onArchiveProject={() => setProjectArchived(project, true)}
