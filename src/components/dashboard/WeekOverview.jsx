@@ -3,9 +3,10 @@ import { CheckCircle2 } from 'lucide-react';
 import { getWeekLabel, getCurrentWeekMonday } from '@/lib/weekUtils';
 import { isProjectComplete } from '@/lib/taskProgress';
 import { isDoneOn, todayStr } from '@/lib/choreCompletion';
+import { isExcused } from '@/lib/modes';
 
-export default function WeekOverview({ tasks }) {
-  const weekTasks = tasks.filter(t => !t.archived && (!t.week_of || t.week_of === getCurrentWeekMonday()));
+export default function WeekOverview({ tasks, mode = 'normal' }) {
+  const weekTasks = tasks.filter(t => !t.archived && !isExcused(t, mode) && (!t.week_of || t.week_of === getCurrentWeekMonday()));
 
   // Chores = routine tasks (75% weight), Team Lift = phase sub-tasks (25% weight)
   const choreTasks = weekTasks.filter(t => t.task_type === 'routine' || (!t.task_type && !t.parent_task_id));
@@ -20,7 +21,7 @@ export default function WeekOverview({ tasks }) {
   const choreProgress = choreTasks.length > 0 ? choresDone / choreTasks.length : 0;
   const teamLiftProgress = teamLiftTasks.length > 0 ? teamLiftDone / teamLiftTasks.length : 0;
 
-  const progress = Math.round(
+  const progress = mode === 'vacation' ? 100 : Math.round(
     hasTeamLift
       ? (choreProgress * 0.75 + teamLiftProgress * 0.25) * 100
       : choreProgress * 100

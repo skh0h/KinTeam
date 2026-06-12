@@ -6,10 +6,13 @@ import TodayChoreList from '@/components/dashboard/TodayChoreList';
 import MyChores from '@/components/dashboard/MyChores';
 import { useLocalUser } from '@/lib/LocalUserContext';
 import { completionUpdate } from '@/lib/choreCompletion';
+import { useHouseholdMode } from '@/hooks/useHouseholdMode';
+import ModeSelector from '@/components/dashboard/ModeSelector';
 
 export default function Dashboard() {
   const { localUser } = useLocalUser();
   const queryClient = useQueryClient();
+  const { mode, setMode, isSaving } = useHouseholdMode();
 
   const toggleChore = useMutation({
     mutationFn: ({ task, dateStr, done }) =>
@@ -32,9 +35,10 @@ export default function Dashboard() {
       <div>
         <h1 className="font-display text-3xl font-bold tracking-tight">Welcome Home</h1>
       </div>
-      <WeekOverview tasks={tasks} />
-      <MyChores tasks={tasks} />
-      <TodayChoreList tasks={tasks} members={members} isAdmin={localUser?.role === 'admin'} currentMemberId={localUser?.id} onToggle={(task, dateStr, done) => toggleChore.mutate({ task, dateStr, done })} />
+      {localUser?.role === 'admin' && <ModeSelector mode={mode} setMode={setMode} isSaving={isSaving} />}
+      <WeekOverview tasks={tasks} mode={mode} />
+      <MyChores tasks={tasks} mode={mode} />
+      <TodayChoreList tasks={tasks} members={members} isAdmin={localUser?.role === 'admin'} currentMemberId={localUser?.id} mode={mode} onToggle={(task, dateStr, done) => toggleChore.mutate({ task, dateStr, done })} />
       {localUser?.role === 'admin' && <AdminAlerts />}
     </div>
   );

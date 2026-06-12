@@ -4,11 +4,12 @@ import { CheckCircle2, Circle, User, ChevronLeft, ChevronRight } from 'lucide-re
 import { format, getDay, addDays, startOfWeek } from 'date-fns';
 import { getCurrentWeekMonday } from '@/lib/weekUtils';
 import { isDoneOn } from '@/lib/choreCompletion';
+import { isExcused } from '@/lib/modes';
 
 const DOW_MAP = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 const WEEK_DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
-export default function TodayChoreList({ tasks, members, isAdmin, currentMemberId, onToggle }) {
+export default function TodayChoreList({ tasks, members, isAdmin, currentMemberId, mode = 'normal', onToggle }) {
   const today = new Date();
   const todayDowIndex = (getDay(today) + 6) % 7; // Mon=0 ... Sun=6
   const weekOf = getCurrentWeekMonday();
@@ -26,8 +27,9 @@ export default function TodayChoreList({ tasks, members, isAdmin, currentMemberI
     return tasks
       .filter(t =>
         t.task_type === 'routine' &&
+        !isExcused(t, mode) &&
         (!t.week_of || t.week_of === weekOf) &&
-        (t.due_day === selectedDayName || t.due_day === 'any')
+        (mode === 'workhorse' || t.due_day === selectedDayName || t.due_day === 'any')
       )
       .sort((a, b) => {
         const aDone = isDoneOn(a, selectedDateStr);
@@ -36,7 +38,7 @@ export default function TodayChoreList({ tasks, members, isAdmin, currentMemberI
         if (!aDone && bDone) return -1;
         return 0;
       });
-  }, [tasks, weekOf, selectedDayName, selectedDateStr]);
+  }, [tasks, weekOf, selectedDayName, selectedDateStr, mode]);
 
   const memberMap = useMemo(() => {
     const map = {};
@@ -115,7 +117,9 @@ export default function TodayChoreList({ tasks, members, isAdmin, currentMemberI
         )}
       </CardHeader>
       <CardContent className="pt-0">
-        {chores.length === 0 ? (
+        {mode === 'vacation' ? (
+          <p className="text-sm text-muted-foreground text-center py-4">🏖️ Vacation mode — all chores are excused!</p>
+        ) : chores.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-4">No chores scheduled 🎉</p>
         ) : (
           <ul className="space-y-2">

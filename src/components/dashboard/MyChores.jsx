@@ -8,6 +8,7 @@ import { Circle, Clock, XCircle, CheckCircle2, Send } from 'lucide-react';
 import { useLocalUser } from '@/lib/LocalUserContext';
 import { getStarWorth } from '@/lib/stars';
 import { isDoneOn, todayStr } from '@/lib/choreCompletion';
+import { isExcused } from '@/lib/modes';
 
 function getChoreState(task, alertsByTaskId) {
   if (isDoneOn(task, todayStr())) return 'done';
@@ -24,16 +25,17 @@ const STATE_CONFIG = {
   done:           { label: 'Done ✓',           bg: 'bg-emerald-50', border: 'border-emerald-200',  Icon: CheckCircle2, iconColor: 'text-emerald-600' },
 };
 
-export default function MyChores({ tasks }) {
+export default function MyChores({ tasks, mode = 'normal' }) {
   const { localUser } = useLocalUser();
   const queryClient = useQueryClient();
 
   const myChores = useMemo(() =>
     tasks.filter(t =>
       t.task_type === 'routine' &&
+      !isExcused(t, mode) &&
       (t.assigned_to === localUser?.id || t.permanent_assigned_to === localUser?.id)
     ),
-    [tasks, localUser?.id]
+    [tasks, localUser?.id, mode]
   );
 
   const { data: alerts = [] } = useQuery({

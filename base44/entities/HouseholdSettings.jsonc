@@ -1,0 +1,17 @@
+{
+  "name": "HouseholdSettings",
+  "type": "object",
+  "properties": {
+    "mode": {
+      "type": "string",
+      "enum": [
+        "normal",
+        "casual",
+        "workhorse",
+        "vacation"
+      ],
+      "default": "normal",
+      "description": "Current household mode"
+    }
+  }
+}
