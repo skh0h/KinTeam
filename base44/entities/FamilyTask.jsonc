@@ -94,6 +94,11 @@
       "type": "string",
       "format": "date"
     },
+    "archived": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the task/project is archived"
+    },
     "steps": {
       "type": "array",
       "items": {

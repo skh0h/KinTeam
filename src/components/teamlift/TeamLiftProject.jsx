@@ -4,7 +4,7 @@ import { Progress } from '@/components/ui/progress';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
-import { ClipboardList, Zap, CheckSquare, Trash2, ChevronDown, MoreVertical, Circle, Clock, CheckCircle2, Lock } from 'lucide-react';
+import { ClipboardList, Zap, CheckSquare, Trash2, ChevronDown, MoreVertical, Circle, Clock, CheckCircle2, Lock, Archive } from 'lucide-react';
 import StatusBadge from '@/components/shared/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -15,7 +15,7 @@ const phaseIcons = { prep: ClipboardList, execution: Zap, verification: CheckSqu
 const phaseLabels = { prep: 'Prep', execution: 'Execution', verification: 'Verification' };
 const phaseOrder = ['prep', 'execution', 'verification'];
 
-export default function TeamLiftProject({ projectName, projectId, phases, onStatusChange, onDelete, onDeleteProject }) {
+export default function TeamLiftProject({ projectName, projectId, phases, onStatusChange, onDelete, onDeleteProject, onArchiveProject }) {
   const [expanded, setExpanded] = useState(false);
   const queryClient = useQueryClient();
   const { localUser } = useLocalUser();
@@ -71,6 +71,10 @@ export default function TeamLiftProject({ projectName, projectId, phases, onStat
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => onArchiveProject && onArchiveProject(projectId)}>
+                    <Archive className="w-4 h-4 mr-2" /> Archive Project
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => onDeleteProject && onDeleteProject(projectId)} className="text-destructive">
                     <Trash2 className="w-4 h-4 mr-2" /> Delete Project
                   </DropdownMenuItem>

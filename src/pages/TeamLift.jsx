@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Plus } from 'lucide-react';
 import TeamLiftForm from '@/components/teamlift/TeamLiftForm';
 import TeamLiftProject from '@/components/teamlift/TeamLiftProject';
+import ArchivedProjects from '@/components/teamlift/ArchivedProjects';
 import { getCurrentWeekMonday } from '@/lib/weekUtils';
 import { useLocalUser } from '@/lib/LocalUserContext';
 
@@ -68,13 +69,24 @@ export default function TeamLift() {
     queryClient.invalidateQueries({ queryKey: ['tasks'] });
   };
 
-  const projects = useMemo(() => {
+  const allProjects = useMemo(() => {
     const parentTasks = tasks.filter(t => t.task_type === 'team_lift' && !t.parent_task_id);
     return parentTasks.map(parent => ({
       ...parent,
       phases: tasks.filter(t => t.parent_task_id === parent.id),
     }));
   }, [tasks]);
+
+  const projects = allProjects.filter(p => !p.archived);
+  const archivedProjects = allProjects.filter(p => p.archived);
+
+  const setProjectArchived = async (project, archived) => {
+    await base44.entities.FamilyTask.update(project.id, { archived });
+    for (const phase of project.phases) {
+      await base44.entities.FamilyTask.update(phase.id, { archived });
+    }
+    queryClient.invalidateQueries({ queryKey: ['tasks'] });
+  };
 
   if (isLoading) {
     return <div className="space-y-4">{Array(2).fill(0).map((_, i) => <Skeleton key={i} className="h-40 rounded-xl" />)}</div>;
@@ -103,6 +115,7 @@ export default function TeamLift() {
             phases={project.phases}
             onStatusChange={(id, status) => updateTask.mutate({ id, data: { status } })}
             onDelete={(id) => deleteTask.mutate(id)}
+            onArchiveProject={() => setProjectArchived(project, true)}
             onDeleteProject={async (id) => {
               // Delete all phases first, then the parent
               for (const phase of project.phases) {
@@ -120,6 +133,8 @@ export default function TeamLift() {
           </div>
         )}
       </div>
+
+      <ArchivedProjects projects={archivedProjects} onRestore={(p) => setProjectArchived(p, false)} />
 
       <TeamLiftForm
         open={formOpen}
