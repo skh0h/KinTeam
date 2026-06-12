@@ -55,37 +55,37 @@ export default function AppShell() {
             })}
           </nav>
         </div>
+
+        {/* Mobile top nav */}
+        <nav className="md:hidden border-t overflow-x-auto">
+          <div className="flex items-center gap-1 px-2 py-1.5 min-w-max">
+            {navItems.map(item => {
+              const Icon = item.icon;
+              const active = location.pathname === item.path;
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={cn(
+                    "flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-all min-w-[52px]",
+                    active
+                      ? "text-primary bg-primary/10"
+                      : "text-muted-foreground"
+                  )}
+                >
+                  <Icon className={cn("w-5 h-5", active && "stroke-[2.5]")} />
+                  <span className="text-[10px] font-medium">{item.label}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
       </header>
 
       {/* Main content */}
-      <main className="max-w-5xl mx-auto px-4 py-6 pb-[calc(7rem+env(safe-area-inset-bottom))] md:pb-6">
+      <main className="max-w-5xl mx-auto px-4 py-6">
         <Outlet />
       </main>
-
-      {/* Mobile bottom nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t bg-background/90 backdrop-blur-lg pb-[env(safe-area-inset-bottom)]">
-        <div className="flex justify-around items-center h-16 px-2">
-          {navItems.map(item => {
-            const Icon = item.icon;
-            const active = location.pathname === item.path;
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={cn(
-                  "flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg transition-all min-w-[52px]",
-                  active
-                    ? "text-primary"
-                    : "text-muted-foreground"
-                )}
-              >
-                <Icon className={cn("w-5 h-5", active && "stroke-[2.5]")} />
-                <span className="text-[10px] font-medium">{item.label}</span>
-              </Link>
-            );
-          })}
-        </div>
-      </nav>
     </div>
   );
 }
