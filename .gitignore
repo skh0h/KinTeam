@@ -29,3 +29,7 @@ dist-ssr
 
 .env
 .vite
+
+# Claude MPM auto-generated runtime files
+.claude-mpm/correlations/
+.claude-mpm/message_check_state.json
