@@ -1,0 +1,9 @@
+# Supabase project config
+# Replace <project-id> with your actual Supabase project reference ID.
+project_id = "<project-id>"
+
+[functions.analyze-chore-photo]
+verify_jwt = true
+
+[functions.analyze-team-lift-photo]
+verify_jwt = true

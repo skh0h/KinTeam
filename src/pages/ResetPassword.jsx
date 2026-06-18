@@ -34,7 +34,11 @@ export default function ResetPassword() {
     }
   };
 
-  if (!resetToken) {
+  // When using Supabase, a recovery session is delivered via URL hash (#access_token=...).
+  // Supabase-js picks it up automatically; treat absence of ?token as valid in this mode.
+  const isSupabaseMode = import.meta.env.VITE_BACKEND === 'supabase';
+
+  if (!resetToken && !isSupabaseMode) {
     return (
       <AuthLayout
         icon={AlertTriangle}

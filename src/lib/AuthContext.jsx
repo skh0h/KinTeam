@@ -19,10 +19,18 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const checkAppState = async () => {
+    // When using the Supabase backend, skip the Base44 /api/apps/public probe
+    // and go straight to checking the Supabase session.
+    if (import.meta.env.VITE_BACKEND === 'supabase') {
+      setIsLoadingPublicSettings(false);
+      await checkUserAuth();
+      return;
+    }
+
     try {
       setIsLoadingPublicSettings(true);
       setAuthError(null);
-      
+
       // First, check app public settings (with token if available)
       // This will tell us if auth is required, user not registered, etc.
       const appClient = createAxiosClient({

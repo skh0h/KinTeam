@@ -1,6 +1,7 @@
 import base44 from "@base44/vite-plugin"
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
+import { fileURLToPath, URL } from 'node:url'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -16,5 +17,22 @@ export default defineConfig({
       visualEditAgent: true
     }),
     react(),
-  ]
+  ],
+  resolve: {
+    alias: [
+      // Redirect the specific base44Client specifier to the backend adapter.
+      // This reroutes all 33 component imports at build time without editing them.
+      // The general '@' alias below must come AFTER this entry.
+      {
+        find: '@/api/base44Client',
+        replacement: fileURLToPath(new URL('./src/api/backendAdapter.js', import.meta.url)),
+      },
+      // General '@' → 'src' alias (provided here since @base44/vite-plugin injects it
+      // internally but we need it declared for resolve.alias to work correctly).
+      {
+        find: '@',
+        replacement: fileURLToPath(new URL('./src', import.meta.url)),
+      },
+    ],
+  },
 });
