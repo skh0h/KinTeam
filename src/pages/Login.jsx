@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
 import { useLocalUser } from "@/lib/LocalUserContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Shield } from "lucide-react";
@@ -87,9 +87,9 @@ export default function Login() {
         ) : members.length === 0 ? (
           <div className="text-center py-8 space-y-3">
             <p className="text-sm text-muted-foreground">No family members set up yet.</p>
-            <a href="/members" className="inline-block px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
+            <Link to="/setup" className="inline-block px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
               Add Members →
-            </a>
+            </Link>
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3">

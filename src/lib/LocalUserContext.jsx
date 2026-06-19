@@ -24,7 +24,7 @@ export function LocalUserProvider({ children }) {
         localStorage.setItem('allhands_local_user', JSON.stringify(fresh));
         setLocalUser(fresh);
       }
-    }).catch(() => {});
+    }).catch((err) => console.warn('LocalUser member refresh failed:', err));
   }, []);
 
   const signIn = (member) => {

@@ -18,6 +18,7 @@ import Dashboard from '@/pages/Dashboard';
 import Zones from '@/pages/Zones';
 import TeamLift from '@/pages/TeamLift';
 import Members from '@/pages/Members';
+import Setup from '@/pages/Setup';
 import Leaderboard from '@/pages/Leaderboard';
 import Rewards from '@/pages/Rewards';
 import Workshop from '@/pages/Workshop';
@@ -40,9 +41,11 @@ const AuthenticatedApp = () => {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
     } else if (authError.type === 'auth_required') {
-      // Redirect to login automatically
-      navigateToLogin();
-      return null;
+      // Only redirect if not already on /login — prevents an infinite reload loop
+      if (window.location.pathname !== '/login') {
+        navigateToLogin();
+        return null;
+      }
     }
   }
 
@@ -50,6 +53,7 @@ const AuthenticatedApp = () => {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/setup" element={<Setup />} />
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
         <Route element={<AppShell />}>
           <Route path="/" element={<Dashboard />} />

@@ -26,6 +26,7 @@ function makeEntity(tableName) {
     // list(sortField?, limit?) → bare array
     // sortField: leading '-' = descending, e.g. '-created_date'
     async list(sortField, limit) {
+      await ensureSession();
       let q = supabase.from(tableName).select('*');
       if (sortField) {
         const desc = sortField.startsWith('-');
@@ -53,8 +54,22 @@ function makeEntity(tableName) {
 
     // create(values) → inserted row (callers use .id)
     // household_id is stamped by the DB column default (auth.uid()); do not pass it.
+    // For tables that FK to households, we upsert the household row first so the
+    // foreign-key constraint is always satisfied (handles new users whose trigger
+    // didn't fire or whose migration was applied after signup).
     async create(values) {
+      await ensureSession();
       const { household_id: _drop, ...safeValues } = values ?? {};
+
+      // Ensure a households row exists for the current user before inserting
+      // into any table that has household_id FK → households(id).
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) throw { status: 401, message: 'Not authenticated' };
+      const { error: upsertError } = await supabase
+        .from('households')
+        .upsert({ id: user.id }, { onConflict: 'id', ignoreDuplicates: true });
+      if (upsertError) throw upsertError;
+
       const { data, error } = await supabase
         .from(tableName)
         .insert(safeValues)
@@ -66,6 +81,7 @@ function makeEntity(tableName) {
 
     // update(id, values) → updated row
     async update(id, values) {
+      await ensureSession();
       const { household_id: _drop, ...safeValues } = values ?? {};
       const { data, error } = await supabase
         .from(tableName)
@@ -79,6 +95,7 @@ function makeEntity(tableName) {
 
     // delete(id)
     async delete(id) {
+      await ensureSession();
       const { error } = await supabase
         .from(tableName)
         .delete()
@@ -100,6 +117,7 @@ const auth = {
   // me() → user object with at least { role }
   // Throws { status: 401 } if no active session (matches Base44 auth error shape)
   async me() {
+    await ensureSession();
     const { data: { user }, error } = await supabase.auth.getUser();
     if (error || !user) throw { status: 401, message: 'Not authenticated' };
     return {
@@ -118,7 +136,9 @@ const auth = {
 
   // redirectToLogin(returnUrl?)
   redirectToLogin(returnUrl) {
-    window.location.href = '/login';
+    if (window.location.pathname !== '/login') {
+      window.location.href = '/login';
+    }
   },
 
   // register({ email, password, ... })
@@ -183,12 +203,30 @@ const auth = {
 };
 
 // --- ensureSession ---
-// With the shared-account-per-family model there is no silent/anonymous sign-in.
-// Each family registers once (signUp) and joins on new devices via signIn.
-// If no session exists, the app's existing Login/Register pages handle it.
-// This function is a no-op gate: callers may await it safely.
-export async function ensureSession() {
-  // No action needed — auth pages drive login/register; supabase-js persists the session.
+// Shared-device model: one Supabase identity per household. On first visit (no
+// session yet) we sign in anonymously so auth.uid() is always non-null, which
+// satisfies the RLS `household_id = auth.uid()` check. The anonymous session is
+// upgradeable later via signUp/OTP (Register.jsx flow) without losing data.
+//
+// Concurrent-call guard: module-level promise is reused by all simultaneous
+// callers (e.g. list() + list() fired together on mount). Once the promise
+// settles it is cleared so the next cold start can re-check the session.
+let _ensureSessionPromise = null;
+
+export function ensureSession() {
+  if (_ensureSessionPromise) return _ensureSessionPromise;
+  _ensureSessionPromise = (async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) return session;
+      const { data, error } = await supabase.auth.signInAnonymously();
+      if (error) throw error;
+      return data.session;
+    } finally {
+      _ensureSessionPromise = null;
+    }
+  })();
+  return _ensureSessionPromise;
 }
 
 // --- Storage ---

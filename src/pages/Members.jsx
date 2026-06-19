@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { UserPlus, Trash2, Shield, User } from 'lucide-react';
 import { useLocalUser } from '@/lib/LocalUserContext';
 import { Navigate } from 'react-router-dom';
+import { toast } from '@/components/ui/use-toast';
 
 export default function Members() {
   const { localUser } = useLocalUser();
@@ -24,6 +25,13 @@ export default function Members() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['members'] });
       setForm({ name: '', display_name: '', avatar_emoji: '', role: 'user' });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Failed to add member',
+        description: error?.message || 'An unexpected error occurred. Please try again.',
+        variant: 'destructive',
+      });
     },
   });
 
