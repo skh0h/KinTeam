@@ -1,9 +1,21 @@
 # Supabase project config
 # Replace <project-id> with your actual Supabase project reference ID.
-project_id = "<project-id>"
+project_id = "djnhsgfldbizgqfdpayn"
 
 [functions.analyze-chore-photo]
 verify_jwt = true
 
 [functions.analyze-team-lift-photo]
 verify_jwt = true
+
+[functions.apply-scheduled-mode]
+verify_jwt = false
+
+[functions.generate-weekly-recap]
+verify_jwt = false
+
+[functions.reset-weekly-chores]
+verify_jwt = false
+
+[functions.update-streaks]
+verify_jwt = false

@@ -65,7 +65,7 @@ export default function ChoreChart({ tasks }) {
   const myChores = tasks.filter(
     t => t.task_type === 'routine' &&
     t.status !== 'done' &&
-    (!t.assigned_to || t.assigned_to === 'anyone' || t.assigned_to === localUser?.name)
+    (!t.assigned_to || t.assigned_to === 'anyone' || t.assigned_to === localUser?.id)
   );
 
   return (

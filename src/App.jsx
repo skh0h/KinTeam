@@ -9,9 +9,6 @@ import ScrollToTop from './components/ScrollToTop';
 import { Navigate } from 'react-router-dom';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Login from '@/pages/Login';
-import Register from '@/pages/Register';
-import ForgotPassword from '@/pages/ForgotPassword';
-import ResetPassword from '@/pages/ResetPassword';
 import AppShell from '@/components/layout/AppShell';
 import { LocalUserProvider } from '@/lib/LocalUserContext';
 import Dashboard from '@/pages/Dashboard';
@@ -23,6 +20,10 @@ import Leaderboard from '@/pages/Leaderboard';
 import Rewards from '@/pages/Rewards';
 import Workshop from '@/pages/Workshop';
 import Settings from '@/pages/Settings';
+import CalendarPage from '@/pages/Calendar';
+import EventWorkshop from '@/pages/EventWorkshop';
+import Family from '@/pages/Family';
+import Wrapped from '@/pages/Wrapped';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -64,6 +65,10 @@ const AuthenticatedApp = () => {
           <Route path="/rewards" element={<Rewards />} />
           <Route path="/members" element={<Members />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/calendar" element={<CalendarPage />} />
+          <Route path="/event-workshop" element={<EventWorkshop />} />
+          <Route path="/family" element={<Family />} />
+          <Route path="/wrapped" element={<Wrapped />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />

@@ -12,21 +12,23 @@ export default function AiChoreBuilder({ onBuilt }) {
     const file = e.target.files?.[0];
     if (!file) return;
     setAnalyzing(true);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
 
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      const response = await base44.functions.invoke('analyzeChorePhoto', { file_url });
+      const result = response.data;
 
-    const response = await base44.functions.invoke('analyzeChorePhoto', { file_url });
-    const result = response.data;
-
-    onBuilt({
-      title: result.title,
-      occurrence: result.occurrence,
-      stars: Math.min(5, Math.max(1, Math.round(result.stars))),
-      notes: result.notes,
-      photo_url: file_url,
-    });
-    setAnalyzing(false);
-    e.target.value = '';
+      onBuilt({
+        title: result.title,
+        occurrence: result.occurrence,
+        stars: Math.min(5, Math.max(1, Math.round(result.stars))),
+        notes: result.notes,
+        photo_url: file_url,
+      });
+    } finally {
+      setAnalyzing(false);
+      e.target.value = '';
+    }
   };
 
   return (

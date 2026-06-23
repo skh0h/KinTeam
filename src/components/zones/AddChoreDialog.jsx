@@ -125,7 +125,7 @@ export default function AddChoreDialog({ open, onOpenChange, onSubmit, members }
               <Select value={form.assigned_to} onValueChange={(v) => set('assigned_to', v)}>
                 <SelectTrigger className="mt-1"><SelectValue placeholder="Unassigned" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={null}>Unassigned</SelectItem>
+                  <SelectItem value="">Unassigned</SelectItem>
                   {(members || []).map(m => (
                     <SelectItem key={m.id} value={m.id}>
                       {m.avatar_emoji ? `${m.avatar_emoji} ` : ''}{m.display_name || m.name}
@@ -139,7 +139,7 @@ export default function AddChoreDialog({ open, onOpenChange, onSubmit, members }
               <Select value={form.permanent_assigned_to} onValueChange={(v) => set('permanent_assigned_to', v)}>
                 <SelectTrigger className="mt-1"><SelectValue placeholder="Nobody" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={null}>Nobody</SelectItem>
+                  <SelectItem value="">Nobody</SelectItem>
                   {(members || []).map(m => (
                     <SelectItem key={m.id} value={m.id}>
                       {m.avatar_emoji ? `${m.avatar_emoji} ` : ''}{m.display_name || m.name}

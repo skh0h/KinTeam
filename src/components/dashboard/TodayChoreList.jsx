@@ -126,11 +126,11 @@ export default function TodayChoreList({ tasks, members, isAdmin, currentMemberI
             {chores.map(chore => {
               const done = isDoneOn(chore, selectedDateStr);
               const assignee = chore.assigned_to ? memberMap[chore.assigned_to] : null;
-              const canToggle = isAdmin && !done;
+              const canToggle = isAdmin;
               return (
                 <li
                   key={chore.id}
-                  onClick={() => canToggle && onToggle && onToggle(chore, selectedDateStr, true)}
+                  onClick={() => canToggle && onToggle && onToggle(chore, selectedDateStr, !done)}
                   className={`flex items-center gap-3 p-2.5 rounded-lg transition-colors ${
                     canToggle ? 'cursor-pointer' : 'cursor-default opacity-70'
                   } ${

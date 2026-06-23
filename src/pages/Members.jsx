@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { UserPlus, Trash2, Shield, User } from 'lucide-react';
 import { useLocalUser } from '@/lib/LocalUserContext';
-import { Navigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
 
 export default function Members() {

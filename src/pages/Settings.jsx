@@ -8,8 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Settings as SettingsIcon, LogOut, Shield, KeyRound } from 'lucide-react';
 import { useLocalUser } from '@/lib/LocalUserContext';
 import { base44 } from '@/api/base44Client';
-
-const ADMIN_PIN = '1234';
+import { hashPin } from '@/lib/pin';
 
 export default function Settings() {
   const { localUser, signIn, signOut } = useLocalUser();
@@ -17,31 +16,36 @@ export default function Settings() {
   const [pinTarget, setPinTarget] = useState(null);
   const [pin, setPin] = useState('');
   const [pinError, setPinError] = useState('');
+  const [pinSubmitting, setPinSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState(() => localUser ? 'account' : 'auth');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [newPin, setNewPin] = useState('');
+  const [confirmPin, setConfirmPin] = useState('');
   const [pwError, setPwError] = useState('');
   const [pwSuccess, setPwSuccess] = useState(false);
 
-  const handleChangePassword = async () => {
+  const handleChangePin = async () => {
     setPwError('');
     setPwSuccess(false);
-    if (!newPassword || !confirmPassword) {
+    if (!newPin || !confirmPin) {
       setPwError('Please fill in both fields.');
       return;
     }
-    if (!/^\d{4,10}$/.test(newPassword)) {
+    if (!/^\d{4,10}$/.test(newPin)) {
       setPwError('PIN must be 4–10 digits (numbers only).');
       return;
     }
-    if (newPassword !== confirmPassword) {
+    if (newPin !== confirmPin) {
       setPwError('PINs do not match.');
       return;
     }
-    await base44.auth.updateMe({ password: newPassword });
-    setPwSuccess(true);
-    setNewPassword('');
-    setConfirmPassword('');
+    try {
+      await base44.entities.FamilyMember.update(localUser.id, { pin_hash: await hashPin(newPin) });
+      setPwSuccess(true);
+      setNewPin('');
+      setConfirmPin('');
+    } catch (err) {
+      setPwError(err.message || 'Failed to update PIN.');
+    }
   };
 
   useEffect(() => {
@@ -60,13 +64,33 @@ export default function Settings() {
     }
   };
 
-  const handlePinSubmit = () => {
-    if (pin === ADMIN_PIN) {
-      signIn(pinTarget);
-      window.location.href = '/';
-    } else {
-      setPinError('Incorrect PIN. Try again.');
-      setPin('');
+  const handlePinSubmit = async () => {
+    if (pinSubmitting) return;
+    setPinSubmitting(true);
+    setPinError('');
+    try {
+      const hashed = await hashPin(pin);
+      if (!pinTarget.pin_hash) {
+        // First run: no PIN set yet — persist this PIN as the admin's PIN
+        await base44.entities.FamilyMember.update(pinTarget.id, { pin_hash: hashed });
+        signIn(pinTarget);
+        setPinTarget(null);
+        setPin('');
+        window.location.href = '/';
+      } else if (hashed === pinTarget.pin_hash) {
+        signIn(pinTarget);
+        setPinTarget(null);
+        setPin('');
+        window.location.href = '/';
+      } else {
+        setPinError('Incorrect PIN. Try again.');
+        setPin('');
+      }
+    } catch (err) {
+      console.error('PIN save failed:', err);
+      setPinError(err.message || 'Could not save PIN. Please try again.');
+    } finally {
+      setPinSubmitting(false);
     }
   };
 
@@ -133,8 +157,8 @@ export default function Settings() {
                       inputMode="numeric"
                       placeholder="4–10 digit PIN"
                       maxLength={10}
-                      value={newPassword}
-                      onChange={(e) => { setNewPassword(e.target.value.replace(/\D/g, '')); setPwError(''); setPwSuccess(false); }}
+                      value={newPin}
+                      onChange={(e) => { setNewPin(e.target.value.replace(/\D/g, '')); setPwError(''); setPwSuccess(false); }}
                     />
                   </div>
                   <div className="space-y-1">
@@ -144,13 +168,13 @@ export default function Settings() {
                       inputMode="numeric"
                       placeholder="Confirm PIN"
                       maxLength={10}
-                      value={confirmPassword}
-                      onChange={(e) => { setConfirmPassword(e.target.value.replace(/\D/g, '')); setPwError(''); setPwSuccess(false); }}
+                      value={confirmPin}
+                      onChange={(e) => { setConfirmPin(e.target.value.replace(/\D/g, '')); setPwError(''); setPwSuccess(false); }}
                     />
                   </div>
                   {pwError && <p className="text-xs text-destructive">{pwError}</p>}
                   {pwSuccess && <p className="text-xs text-emerald-600">PIN updated successfully.</p>}
-                  <Button className="w-full" onClick={handleChangePassword}>Update PIN</Button>
+                  <Button className="w-full" onClick={handleChangePin}>Update PIN</Button>
                 </div>
               </CardContent>
             </Card>
@@ -179,8 +203,10 @@ export default function Settings() {
                   />
                   {pinError && <p className="text-xs text-destructive">{pinError}</p>}
                   <div className="flex gap-2">
-                    <Button className="flex-1" onClick={handlePinSubmit}>Confirm</Button>
-                    <Button variant="outline" className="flex-1" onClick={() => setPinTarget(null)}>Cancel</Button>
+                    <Button className="flex-1" onClick={handlePinSubmit} disabled={pinSubmitting}>
+                      {pinSubmitting ? 'Saving…' : 'Confirm'}
+                    </Button>
+                    <Button variant="outline" className="flex-1" onClick={() => { setPinTarget(null); setPin(''); setPinError(''); }} disabled={pinSubmitting}>Cancel</Button>
                   </div>
                 </div>
               </CardContent>

@@ -30,8 +30,9 @@ export default function TradeRequests() {
     mutationFn: async ({ trade, approve }) => {
       if (approve) {
         const [task] = await base44.entities.FamilyTask.filter({ id: trade.task_id });
+        if (!task) throw new Error(`Task ${trade.task_id} not found`);
         const update = { assigned_to: trade.to_member_id };
-        if (task?.permanent_assigned_to === trade.from_member_id) {
+        if (task.permanent_assigned_to === trade.from_member_id) {
           update.permanent_assigned_to = trade.to_member_id;
         }
         await base44.entities.FamilyTask.update(trade.task_id, update);
