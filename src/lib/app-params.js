@@ -39,6 +39,9 @@ const getAppParams = () => {
 		storage.removeItem('base44_access_token');
 		storage.removeItem('token');
 	}
+	// NOTE: VITE_BASE44_* env vars (appId, functionsVersion, appBaseUrl) are only
+	// relevant when VITE_BACKEND !== 'supabase'. Under the Supabase backend these
+	// values are unused; they are read here to keep the Base44 fallback path intact.
 	return {
 		appId: getAppParamValue("app_id", { defaultValue: import.meta.env.VITE_BASE44_APP_ID }),
 		token: getAppParamValue("access_token", { removeFromUrl: true }),

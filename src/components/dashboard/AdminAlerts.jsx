@@ -17,6 +17,7 @@ export default function AdminAlerts() {
   const approve = useMutation({
     mutationFn: async (alert) => {
       const [task] = await base44.entities.FamilyTask.filter({ id: alert.task_id });
+      if (!task) throw new Error(`Task ${alert.task_id} not found`);
       if (alert.step_id) {
         // Team Lift step approval
         const steps = (task.steps || []).map(s =>
@@ -33,7 +34,7 @@ export default function AdminAlerts() {
           await base44.entities.FamilyTask.update(task.parent_task_id, { status: parentStatus });
         }
       } else {
-        await base44.entities.FamilyTask.update(alert.task_id, completionUpdate(task, todayStr(), true));
+        await base44.entities.FamilyTask.update(alert.task_id, completionUpdate(task, alert.created_date || todayStr(), true));
       }
       await base44.entities.AdminAlert.update(alert.id, { status: 'approved' });
     },
@@ -46,6 +47,7 @@ export default function AdminAlerts() {
   const reject = useMutation({
     mutationFn: async (alert) => {
       const [task] = await base44.entities.FamilyTask.filter({ id: alert.task_id });
+      if (!task) throw new Error(`Task ${alert.task_id} not found`);
       if (alert.step_id) {
         // Team Lift step rejection — uncheck the pending step
         const steps = (task.steps || []).map(s =>

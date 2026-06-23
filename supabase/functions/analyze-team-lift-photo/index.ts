@@ -1,3 +1,5 @@
+import { validateStorageUrl, fetchImageAsBase64 } from '../_shared/vision.ts';
+
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -18,17 +20,14 @@ Deno.serve(async (req) => {
       );
     }
 
+    // SSRF guard: reject URLs that don't point at this project's Supabase Storage
+    const ssrfError = validateStorageUrl(file_url, CORS_HEADERS);
+    if (ssrfError) return ssrfError;
+
     // Fetch the uploaded photo and base64-encode it
-    const imgRes = await fetch(file_url);
-    const mimeType = imgRes.headers.get('content-type') || 'image/jpeg';
-    const buffer = await imgRes.arrayBuffer();
-    const bytes = new Uint8Array(buffer);
-    let binary = '';
-    const chunkSize = 8192;
-    for (let i = 0; i < bytes.length; i += chunkSize) {
-      binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
-    }
-    const base64 = btoa(binary);
+    const imgResult = await fetchImageAsBase64(file_url, CORS_HEADERS);
+    if (!imgResult.ok) return imgResult.response;
+    const { mimeType, base64 } = imgResult;
 
     const phaseSchema = {
       type: 'OBJECT',
@@ -83,8 +82,9 @@ Return:
 
     if (!geminiRes.ok) {
       const errText = await geminiRes.text();
+      console.error('Gemini API error:', errText);
       return Response.json(
-        { error: `Gemini API error: ${errText}` },
+        { error: 'AI analysis failed' },
         { status: 500, headers: CORS_HEADERS }
       );
     }
@@ -95,8 +95,9 @@ Return:
 
     return Response.json(result, { headers: CORS_HEADERS });
   } catch (error) {
+    console.error('Unhandled error:', error);
     return Response.json(
-      { error: error.message },
+      { error: 'Internal server error' },
       { status: 500, headers: CORS_HEADERS }
     );
   }

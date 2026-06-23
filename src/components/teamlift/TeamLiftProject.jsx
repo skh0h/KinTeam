@@ -61,14 +61,14 @@ export default function TeamLiftProject({ projectName, projectId, phases, member
     queryClient.invalidateQueries({ queryKey: ['admin-alerts'] });
   };
 
-  const reassignPhase = async (task, name) => {
-    await base44.entities.FamilyTask.update(task.id, { assigned_to: name });
+  const reassignPhase = async (task, memberId) => {
+    await base44.entities.FamilyTask.update(task.id, { assigned_to: memberId });
     queryClient.invalidateQueries({ queryKey: ['tasks'] });
   };
 
-  const reassignStep = async (task, stepId, name) => {
+  const reassignStep = async (task, stepId, memberId) => {
     const steps = (task.steps || []).map(s =>
-      s.id === stepId ? { ...s, assigned_to: name } : s
+      s.id === stepId ? { ...s, assigned_to: memberId } : s
     );
     await base44.entities.FamilyTask.update(task.id, { steps });
     queryClient.invalidateQueries({ queryKey: ['tasks'] });
@@ -124,7 +124,7 @@ export default function TeamLiftProject({ projectName, projectId, phases, member
             const Icon = phaseIcons[task.phase] || ClipboardList;
             const steps = task.steps || [];
             const stepsDone = steps.filter(s => s.done).length;
-            const matchesMe = (name) => !!name && (name === localUser?.name || name === localUser?.display_name);
+            const matchesMe = (id) => !!id && id === localUser?.id;
             const canEdit = isAdmin || matchesMe(task.assigned_to);
             const canEditStep = (step) => (canEdit || matchesMe(step.assigned_to)) && (isAdmin || !step.done);
             const hasAnyAccess = canEdit || steps.some(s => matchesMe(s.assigned_to));
@@ -163,7 +163,7 @@ export default function TeamLiftProject({ projectName, projectId, phases, member
                             <DropdownMenuSeparator />
                             <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">Reassign to</DropdownMenuLabel>
                             {members.map(m => (
-                              <DropdownMenuItem key={m.id} onClick={() => reassignPhase(task, m.display_name || m.name)}>
+                              <DropdownMenuItem key={m.id} onClick={() => reassignPhase(task, m.id)}>
                                 <User className="w-4 h-4 mr-2 text-muted-foreground" />
                                 {m.avatar_emoji ? `${m.avatar_emoji} ` : ''}{m.display_name || m.name}
                               </DropdownMenuItem>
@@ -188,7 +188,7 @@ export default function TeamLiftProject({ projectName, projectId, phases, member
                 <p className="text-sm font-medium">{task.title}</p>
 
                 {task.assigned_to && (
-                  <p className="text-xs text-muted-foreground">Assigned to: {task.assigned_to}</p>
+                  <p className="text-xs text-muted-foreground">Assigned to: {members.find(m => m.id === task.assigned_to)?.display_name || members.find(m => m.id === task.assigned_to)?.name || task.assigned_to}</p>
                 )}
 
                 {task.notes && (
@@ -231,12 +231,12 @@ export default function TeamLiftProject({ projectName, projectId, phases, member
                             <DropdownMenuTrigger asChild>
                               <button className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 shrink-0">
                                 <User className="w-3 h-3" />
-                                {step.assigned_to && step.assigned_to !== 'unassigned' ? step.assigned_to : 'Assign'}
+                                {step.assigned_to && step.assigned_to !== 'unassigned' ? (members.find(m => m.id === step.assigned_to)?.display_name || members.find(m => m.id === step.assigned_to)?.name || step.assigned_to) : 'Assign'}
                               </button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               {members.map(m => (
-                                <DropdownMenuItem key={m.id} onClick={() => reassignStep(task, step.id, m.display_name || m.name)}>
+                                <DropdownMenuItem key={m.id} onClick={() => reassignStep(task, step.id, m.id)}>
                                   {m.avatar_emoji ? `${m.avatar_emoji} ` : ''}{m.display_name || m.name}
                                 </DropdownMenuItem>
                               ))}
@@ -249,7 +249,7 @@ export default function TeamLiftProject({ projectName, projectId, phases, member
                           </DropdownMenu>
                         ) : (
                           step.assigned_to && step.assigned_to !== 'unassigned' && (
-                            <span className="text-xs text-muted-foreground shrink-0">{step.assigned_to}</span>
+                            <span className="text-xs text-muted-foreground shrink-0">{members.find(m => m.id === step.assigned_to)?.display_name || members.find(m => m.id === step.assigned_to)?.name || step.assigned_to}</span>
                           )
                         )}
                       </div>

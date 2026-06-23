@@ -49,9 +49,12 @@ export default function Workshop() {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    set('photo_url', file_url);
-    setUploading(false);
+    try {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      set('photo_url', file_url);
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleBuild = () => {
@@ -132,7 +135,7 @@ export default function Workshop() {
             <Select value={form.assigned_to} onValueChange={(v) => set('assigned_to', v)}>
               <SelectTrigger><SelectValue placeholder="This week: Unassigned" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value={null}>Unassigned</SelectItem>
+                <SelectItem value="">Unassigned</SelectItem>
                 {members.map(m => (
                   <SelectItem key={m.id} value={m.id}>
                     {m.avatar_emoji ? `${m.avatar_emoji} ` : ''}{m.display_name || m.name}
@@ -143,7 +146,7 @@ export default function Workshop() {
             <Select value={form.permanent_assigned_to} onValueChange={(v) => set('permanent_assigned_to', v)}>
               <SelectTrigger><SelectValue placeholder="Always: Nobody" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value={null}>Nobody</SelectItem>
+                <SelectItem value="">Nobody</SelectItem>
                 {members.map(m => (
                   <SelectItem key={m.id} value={m.id}>
                     {m.avatar_emoji ? `${m.avatar_emoji} ` : ''}{m.display_name || m.name}

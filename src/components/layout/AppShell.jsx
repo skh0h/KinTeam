@@ -1,7 +1,8 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Home, Users, UserPlus, Settings, ClipboardList, Trophy, Gift } from 'lucide-react';
+import { Home, Users, Settings, ClipboardList, Trophy, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLocalUser } from '@/lib/LocalUserContext';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 export default function AppShell() {
   const location = useLocation();
@@ -12,8 +13,7 @@ export default function AppShell() {
     { path: '/zones', label: 'Chores', icon: ClipboardList },
     { path: '/team-lift', label: 'Team Lift', icon: Users },
     { path: '/leaderboard', label: 'Leaders', icon: Trophy },
-    { path: '/rewards', label: 'Rewards', icon: Gift },
-    ...(localUser?.role === 'admin' ? [{ path: '/members', label: 'Members', icon: UserPlus }] : []),
+    { path: '/family', label: 'Family', icon: Heart },
     { path: '/settings', label: 'Settings', icon: Settings },
   ];
 
@@ -83,7 +83,9 @@ export default function AppShell() {
 
       {/* Main content */}
       <main className="max-w-5xl mx-auto px-4 py-6">
-        <Outlet />
+        <ErrorBoundary>
+          <Outlet />
+        </ErrorBoundary>
       </main>
     </div>
   );

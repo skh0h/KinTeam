@@ -1,5 +1,30 @@
 import { supabase } from './supabaseClient';
 
+/**
+ * Supabase backend adapter — entity and functions surface contract.
+ *
+ * @typedef {Object} EntityClient
+ * @property {(sortField?: string, limit?: number) => Promise<Array>} list
+ *   Fetch all rows. sortField may be prefixed with '-' for descending.
+ * @property {(criteria: Record<string, unknown>) => Promise<Array>} filter
+ *   Fetch rows matching every key=value pair in criteria.
+ * @property {(id: string) => Promise<Object>} get
+ *   Fetch a single row by primary key.
+ * @property {(values: Object) => Promise<Object>} create
+ *   Insert a row; household_id is stripped (set by DB default). Returns inserted row.
+ * @property {(id: string, values: Object) => Promise<Object>} update
+ *   Update a row by primary key; household_id is stripped. Returns updated row.
+ * @property {(id: string) => Promise<void>} delete
+ *   Delete a row by primary key.
+ *
+ * functions.invoke(name, payload) → { data }
+ *   Dispatches to an Edge Function via FN_MAP. Names not in FN_MAP that are
+ *   in DEFERRED are silently skipped (no-op) rather than thrown.
+ *
+ * integrations.Core.UploadFile({ file }) → { file_url }
+ *   Uploads a file to the 'uploads' storage bucket and returns a signed URL.
+ */
+
 // PascalCase entity name → postgres table name
 const TABLE_MAP = {
   FamilyTask: 'family_tasks',
@@ -11,14 +36,20 @@ const TABLE_MAP = {
   RewardRedemption: 'reward_redemptions',
   ChoreTrade: 'chore_trades',
   SystemZone: 'system_zones',
-  HuddleNote: 'huddle_notes',
   WeeklyRecap: 'weekly_recaps',
+  FamilyPet: 'family_pet',
+  Kudos: 'kudos',
+  ShoutOut: 'shout_outs',
 };
+
+// Module-level flag: household upsert is idempotent per session; run it at most once.
+let _householdEnsured = false;
 
 // Edge function name map
 const FN_MAP = {
   analyzeChorePhoto: 'analyze-chore-photo',
   analyzeTeamLiftPhoto: 'analyze-team-lift-photo',
+  analyzeEventPhoto: 'analyze-event-photo',
 };
 
 function makeEntity(tableName) {
@@ -43,6 +74,7 @@ function makeEntity(tableName) {
 
     // filter({key: value, ...}) → bare array
     async filter(criteria) {
+      await ensureSession(); // C-2: was missing; RLS silently returned [] on cold load (S-1 race also resolved here)
       let q = supabase.from(tableName).select('*');
       for (const [k, v] of Object.entries(criteria)) {
         q = q.eq(k, v);
@@ -54,21 +86,11 @@ function makeEntity(tableName) {
 
     // create(values) → inserted row (callers use .id)
     // household_id is stamped by the DB column default (auth.uid()); do not pass it.
-    // For tables that FK to households, we upsert the household row first so the
-    // foreign-key constraint is always satisfied (handles new users whose trigger
-    // didn't fire or whose migration was applied after signup).
+    // The households upsert (FK guard) now runs inside ensureSession() so all entity
+    // operations benefit from it, not just create().
     async create(values) {
       await ensureSession();
       const { household_id: _drop, ...safeValues } = values ?? {};
-
-      // Ensure a households row exists for the current user before inserting
-      // into any table that has household_id FK → households(id).
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError || !user) throw { status: 401, message: 'Not authenticated' };
-      const { error: upsertError } = await supabase
-        .from('households')
-        .upsert({ id: user.id }, { onConflict: 'id', ignoreDuplicates: true });
-      if (upsertError) throw upsertError;
 
       const { data, error } = await supabase
         .from(tableName)
@@ -118,6 +140,11 @@ const auth = {
   // Throws { status: 401 } if no active session (matches Base44 auth error shape)
   async me() {
     await ensureSession();
+    // L-2: ensureSession() returns the session object but not the full user profile
+    // (which includes user_metadata). supabase.auth.getUser() is a separate call that
+    // validates the JWT server-side and returns the canonical user record. Reusing the
+    // session token here would skip that validation and could return stale metadata.
+    // Left as two calls intentionally to preserve the auth guarantee.
     const { data: { user }, error } = await supabase.auth.getUser();
     if (error || !user) throw { status: 401, message: 'Not authenticated' };
     return {
@@ -211,6 +238,12 @@ const auth = {
 // Concurrent-call guard: module-level promise is reused by all simultaneous
 // callers (e.g. list() + list() fired together on mount). Once the promise
 // settles it is cleared so the next cold start can re-check the session.
+//
+// M-1: On sign-in failure, all concurrent awaiters reject together by design —
+// the single shared promise propagates the error to every caller, which surfaces
+// it to the UI. This is intentional: a broken session should fail loudly, not
+// silently. S-1 (filter() race leading to unauthenticated RLS) is resolved by
+// fix C-2 above, which adds ensureSession() as the first line of filter().
 let _ensureSessionPromise = null;
 
 export function ensureSession() {
@@ -218,10 +251,24 @@ export function ensureSession() {
   _ensureSessionPromise = (async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (session) return session;
-      const { data, error } = await supabase.auth.signInAnonymously();
-      if (error) throw error;
-      return data.session;
+      if (!session) {
+        const { data, error } = await supabase.auth.signInAnonymously();
+        if (error) throw error;
+      }
+      // Ensure a households row exists for the current user. Runs at most once per
+      // session (M-4: idempotent upsert, but avoids a round-trip on every call).
+      // Placed here so every entity operation benefits, not just create().
+      if (!_householdEnsured) {
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError || !user) throw { status: 401, message: 'Not authenticated' };
+        const { error: upsertError } = await supabase
+          .from('households')
+          .upsert({ id: user.id }, { onConflict: 'id', ignoreDuplicates: true });
+        if (upsertError) throw upsertError;
+        _householdEnsured = true;
+      }
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      return currentSession;
     } finally {
       _ensureSessionPromise = null;
     }
@@ -230,6 +277,20 @@ export function ensureSession() {
 }
 
 // --- Storage ---
+
+// Signed URL TTL: 1 year in seconds.
+//
+// Tradeoff: a long-lived signed URL is stored directly in entity rows because
+// the Base44-synced components read `file_url` at render time and cannot be
+// edited to re-sign on each read. A 1-year TTL is far better than public-read
+// (URLs are now unguessable, scoped, and expirable), but the URL will stop
+// working after the TTL expires.
+//
+// Future enhancement: store the storage PATH in entity rows instead of the
+// signed URL, then re-sign inside the adapter's list/get methods on every
+// fetch — giving fresh short-TTL URLs without any component changes.
+const SIGNED_URL_TTL_SECONDS = 60 * 60 * 24 * 365; // 1 year
+
 const integrations = {
   Core: {
     async UploadFile({ file }) {
@@ -241,8 +302,11 @@ const integrations = {
         .from('uploads')
         .upload(path, file, { contentType: file.type });
       if (error) throw error;
-      const { data } = supabase.storage.from('uploads').getPublicUrl(path);
-      return { file_url: data.publicUrl };
+      const { data: signedData, error: signedError } = await supabase.storage
+        .from('uploads')
+        .createSignedUrl(path, SIGNED_URL_TTL_SECONDS);
+      if (signedError) throw signedError;
+      return { file_url: signedData.signedUrl };
     },
   },
 };
@@ -253,7 +317,17 @@ const functions = {
   // Callers read response.data (e.g. AiChoreBuilder reads result.data.title)
   async invoke(name, payload) {
     const mapped = FN_MAP[name];
-    if (!mapped) throw new Error(`Unknown function: ${name}`);
+    if (!mapped) {
+      // CRITICAL-2: These 5 functions are pg_cron-triggered edge endpoints scheduled
+      // in migrations 0003/0006 — they are called directly by the DB scheduler, not
+      // from the frontend. Intentionally not in FN_MAP; no-op here is correct.
+      const DEFERRED = ['resetWeeklyChores', 'updateStreaks', 'applyScheduledMode', 'generateWeeklyRecap', 'rollEvents'];
+      if (DEFERRED.includes(name)) {
+        console.warn(`[supabaseAdapter] "${name}" is pg_cron-triggered and not frontend-routable — skipping.`);
+        return { data: null };
+      }
+      throw new Error(`Unknown function: ${name}`);
+    }
     const { data, error } = await supabase.functions.invoke(mapped, {
       body: payload,
     });

@@ -17,7 +17,13 @@ export function LocalUserProvider({ children }) {
   useEffect(() => {
     const stored = localStorage.getItem('allhands_local_user');
     if (!stored) return;
-    const cached = JSON.parse(stored);
+    let cached;
+    try {
+      cached = JSON.parse(stored);
+    } catch {
+      localStorage.removeItem('allhands_local_user');
+      return;
+    }
     base44.entities.FamilyMember.list().then(members => {
       const fresh = members.find(m => m.id === cached.id);
       if (fresh) {
